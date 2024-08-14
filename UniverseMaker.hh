@@ -586,7 +586,8 @@ void UniverseMaker::build_universes(
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
   // with MC events, then we shouldn't do anything with the true bin counts.
   bool is_mc;
-  input_chain_.SetBranchAddress( "is_mc", &is_mc );
+  is_mc = input_chain_.GetBranchStatus("mcEntryNumber");
+//  input_chain_.SetBranchAddress( "is_mc", &is_mc );
 
   // Get the first TChain entry so that we can know the number of universes
   // used in each vector of weights
@@ -657,7 +658,7 @@ void UniverseMaker::build_universes(
       // below
       auto& wm = wh.weight_map();
       if ( wm.size() > 0u ) {
-        spline_weight = wm.at( SPLINE_WEIGHT_NAME )->front();
+//        spline_weight = wm.at( SPLINE_WEIGHT_NAME )->front();
         tune_weight = wm.at( TUNE_WEIGHT_NAME )->front();
       }
     } // MC event
@@ -675,7 +676,7 @@ void UniverseMaker::build_universes(
         double w = wgt_vec->operator[]( u );
 
         // Multiply by any needed CV correction weights
-        apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
+//        apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
 
         // Deal with NaNs, etc. to make a "safe weight" in all cases
         double safe_wgt = safe_weight( w );

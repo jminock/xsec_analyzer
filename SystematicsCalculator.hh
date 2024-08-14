@@ -724,11 +724,18 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           // TODO: use the TDirectoryFile to handle this rather than
           // pulling it out of the original ntuple file
           TFile temp_mc_file( file_name.c_str(), "read" );
-          TParameter<float>* temp_pot = nullptr;
+/*          TParameter<float>* temp_pot = nullptr;
           temp_mc_file.GetObject( "summed_pot", temp_pot );
-          if ( !temp_pot ) throw std::runtime_error(
+          if ( !temp_pot ) throw std::runtime_error(*/
+          TTree* temp_mc_tree = (TTree*) temp_mc_file.Get("phaseIITriggerTree");
+          double temp_pot = 0;
+          temp_mc_tree->SetBranchAddress( "beam_pot", &temp_pot );
+          temp_mc_tree->GetEntry(0);
+          if ( temp_pot == 0 ) throw std::runtime_error(
             "Missing POT in MC file!" );
-          file_pot = temp_pot->GetVal();
+//          file_pot = temp_pot->GetVal();
+          file_pot = temp_pot;
+          file_pot = 1.56e+19; //ACTUALLY FIX THIS SO IT'S NOT 3.2545e16
         }
         else {
           // We can ask the FilePropertiesManager for the data POT values
@@ -749,11 +756,19 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
         // scaling to the beam-on triggers in the case of EXT data
         if ( !is_mc ) {
 
-          auto reco_hist = get_object_unique_ptr< TH1D >(
-            "unweighted_0_reco", *subdir );
+          // When using fake data, test whether there is a weighted CV histogram present (e.g. for a closure test with MC)
+          auto tmp_reco_hist = type == NFT::kOnBNB ? get_object_unique_ptr<TH1D>((CV_UNIV_NAME + "_0_reco").c_str(), *subdir) : nullptr;
+          const auto dataContainsWeightedCV = tmp_reco_hist.get() != nullptr;
+          std::cout << "DEBUG dataContainsWeightedCV: "<<dataContainsWeightedCV<<" isonbnb: " << (type == NFT::kOnBNB) << " tmp_reco_hist.get()!=nullptr: " << (tmp_reco_hist.get() != nullptr) << std::endl;
+          auto reco_hist = dataContainsWeightedCV ? std::move(tmp_reco_hist) : get_object_unique_ptr<TH1D>("unweighted_0_reco", *subdir);
 
-          auto reco_hist2d = get_object_unique_ptr< TH2D >(
-            "unweighted_0_reco2d", *subdir );
+          const std::string reco_hist2d_name = (dataContainsWeightedCV ? CV_UNIV_NAME : "unweighted") + "_0_reco2d";
+          auto reco_hist2d = get_object_unique_ptr<TH2D>(reco_hist2d_name.c_str(), *subdir);
+//          auto reco_hist = get_object_unique_ptr< TH1D >(
+//            "unweighted_0_reco", *subdir );
+
+//          auto reco_hist2d = get_object_unique_ptr< TH2D >(
+//            "unweighted_0_reco2d", *subdir );
 
           // If we're working with EXT data, scale it to the corresponding
           // number of triggers from the BNB data from the same run

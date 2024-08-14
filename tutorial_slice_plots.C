@@ -17,7 +17,7 @@
 
 using NFT = NtupleFileType;
 
-#define USE_FAKE_DATA ""
+//#define USE_FAKE_DATA ""
 
 void tutorial_slice_plots() {
 
@@ -29,7 +29,8 @@ void tutorial_slice_plots() {
   #endif
 
   auto* syst_ptr = new MCC9SystematicsCalculator(
-    "/uboone/data/users/gardiner/tutorial_univmake_output.root",
+//    "/exp/annie/data/users/jminock/stv-analysis/stv-univmake-output-20k.root",
+    "/exp/annie/app/users/jminock/xsec_analyzer/output.root",
     "systcalc.conf" );
   auto& syst = *syst_ptr;
 
@@ -68,11 +69,11 @@ void tutorial_slice_plots() {
 
     // We now have all of the reco bin space histograms that we need as input.
     // Use them to make new histograms in slice space.
-    SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
-      *reco_bnb_hist, slice, &matrix_map.at("BNBstats") );
+//    SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
+//      *reco_bnb_hist, slice, &matrix_map.at("BNBstats") );
 
-    SliceHistogram* slice_ext = SliceHistogram::make_slice_histogram(
-      *reco_ext_hist, slice, &matrix_map.at("EXTstats") );
+//    SliceHistogram* slice_ext = SliceHistogram::make_slice_histogram(
+//      *reco_ext_hist, slice, &matrix_map.at("EXTstats") );
 
     SliceHistogram* slice_mc_plus_ext = SliceHistogram::make_slice_histogram(
       *reco_mc_plus_ext_hist, slice, &matrix_map.at("total") );
@@ -85,10 +86,10 @@ void tutorial_slice_plots() {
     // Build a stack of categorized central-value MC predictions plus the
     // extBNB contribution in slice space
     const auto& eci = EventCategoryInterpreter::Instance();
-    eci.set_ext_histogram_style( slice_ext->hist_.get() );
+//    eci.set_ext_histogram_style( slice_ext->hist_.get() );
 
     THStack* slice_pred_stack = new THStack( "mc+ext", "" );
-    slice_pred_stack->Add( slice_ext->hist_.get() ); // extBNB
+//    slice_pred_stack->Add( slice_ext->hist_.get() ); // extBNB
 
     const auto& cat_map = eci.label_map();
 
@@ -115,7 +116,7 @@ void tutorial_slice_plots() {
     }
 
     TCanvas* c1 = new TCanvas;
-    slice_bnb->hist_->SetLineColor( kBlack );
+/*    slice_bnb->hist_->SetLineColor( kBlack );
     slice_bnb->hist_->SetLineWidth( 3 );
     slice_bnb->hist_->SetMarkerStyle( kFullCircle );
     slice_bnb->hist_->SetMarkerSize( 0.8 );
@@ -127,11 +128,11 @@ void tutorial_slice_plots() {
     slice_bnb->hist_->Draw( "e" );
 
     slice_pred_stack->Draw( "hist same" );
-
+*/
     slice_mc_plus_ext->hist_->SetLineWidth( 3 );
     slice_mc_plus_ext->hist_->Draw( "same hist e" );
 
-    slice_bnb->hist_->Draw( "same e" );
+//    slice_bnb->hist_->Draw( "same e" );
 
     //std::string out_pdf_name = "plot_slice_";
     //if ( sl_idx < 10 ) out_pdf_name += "0";
@@ -153,13 +154,15 @@ void tutorial_slice_plots() {
     // in the ROOT plot. All configured fractional uncertainties will be
     // included in the output pgfplots file regardless of whether they appear
     // in this vector.
-    const std::vector< std::string > cov_mat_keys = { "total",
+    const std::vector< std::string > cov_mat_keys = { "total" };
+ 
+/*    const std::vector< std::string > cov_mat_keys = { "total",
       "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
       "MCstats", "EXTstats", "BNBstats"
     };
-
+*/
     // Loop over the various systematic uncertainties
-    int color = 0;
+    int color = 1;
     for ( const auto& pair : matrix_map ) {
 
       const auto& key = pair.first;
