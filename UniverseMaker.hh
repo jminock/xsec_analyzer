@@ -265,11 +265,6 @@ class Universe {
         "; reco bin number; reco bin number; counts", num_reco_bins, 0.,
         num_reco_bins, num_reco_bins, 0., num_reco_bins );
 
-      hist_true2d_ = std::make_unique< TH2D >(
-        (hist_name_prefix + "_true2d").c_str(),
-        "; true bin number; true bin number; counts", num_true_bins, 0.,
-        num_true_bins, num_true_bins, 0., num_true_bins );
-
       // Get the number of defined EventCategory values by checking the number
       // of elements in the "label map" managed by the EventCategoryInterpreter
       // singleton class
@@ -288,25 +283,22 @@ class Universe {
       hist_2d_->Sumw2();
       hist_categ_->Sumw2();
       hist_reco2d_->Sumw2();
-      hist_true2d_->Sumw2();
     }
 
     // Note: the new Universe object takes ownership of the histogram
     // pointers passed to this constructor
     Universe( const std::string& universe_name,
       size_t universe_index, TH1D* hist_true, TH1D* hist_reco, TH2D* hist_2d,
-      TH2D* hist_categ, TH2D* hist_reco2d, TH2D* hist_true2d )
+      TH2D* hist_categ, TH2D* hist_reco2d )
       : universe_name_( universe_name ), index_( universe_index ),
       hist_true_( hist_true ), hist_reco_( hist_reco ), hist_2d_( hist_2d ),
-      hist_categ_( hist_categ ), hist_reco2d_( hist_reco2d ),
-      hist_true2d_( hist_true2d )
+      hist_categ_( hist_categ ), hist_reco2d_( hist_reco2d )
     {
       hist_true_->SetDirectory( nullptr );
       hist_reco_->SetDirectory( nullptr );
       hist_2d_->SetDirectory( nullptr );
       hist_categ_->SetDirectory( nullptr );
       hist_reco2d_->SetDirectory( nullptr );
-      hist_true2d_->SetDirectory( nullptr );
     }
 
     std::unique_ptr< Universe > clone() const {
@@ -320,7 +312,6 @@ class Universe {
       result->hist_2d_->Add( this->hist_2d_.get() );
       result->hist_categ_->Add( this->hist_categ_.get() );
       result->hist_reco2d_->Add( this->hist_reco2d_.get() );
-      result->hist_true2d_->Add( this->hist_true2d_.get() );
 
       return result;
     }
@@ -332,7 +323,6 @@ class Universe {
     std::unique_ptr< TH2D > hist_2d_;
     std::unique_ptr< TH2D > hist_categ_;
     std::unique_ptr< TH2D > hist_reco2d_;
-    std::unique_ptr< TH2D > hist_true2d_;
 };
 
 class UniverseMaker {
@@ -456,8 +446,8 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
     in_file >> temp_bin;
 
     // DEBUG
-    std::cout << "tb = " << tb << '\n';
-    std::cout << temp_bin << '\n';
+    // std::cout << "tb = " << tb << '\n';
+    // std::cout << temp_bin << '\n';
 
     true_bins_.push_back( temp_bin );
   }
@@ -470,8 +460,8 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
     in_file >> temp_bin;
 
     // DEBUG
-    std::cout << "rb = " << rb << '\n';
-    std::cout << temp_bin << '\n';
+    // std::cout << "rb = " << rb << '\n';
+    // std::cout << temp_bin << '\n';
 
     reco_bins_.push_back( temp_bin );
   }
@@ -480,20 +470,26 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
 
 void UniverseMaker::add_input_file( const std::string& input_file_name )
 {
+  std::cout << "DEBUG UniverseMaker::add_input_file - Point 0"<<std::endl;
   // Check to make sure that the input file contains the expected ntuple
   TFile temp_file( input_file_name.c_str(), "read" );
 
   // Temporary storage
   TTree* temp_tree;
 
+  std::cout << "DEBUG UniverseMaker::add_input_file - Point 1"<<std::endl;
   std::string tree_name = input_chain_.GetName();
   temp_file.GetObject( tree_name.c_str(), temp_tree );
+
+  std::cout << "DEBUG UniverseMaker::add_input_file - Point 2"<<std::endl;
   if ( !temp_tree ) throw std::runtime_error( "Missing ntuple TTree "
     + tree_name + " in the input ntuple file " + input_file_name );
 
+  std::cout << "DEBUG UniverseMaker::add_input_file - Point 3"<<std::endl;
   // If we've made it here, then the input file has passed all of the checks.
   // Add it to the input TChain.
   input_chain_.AddFile( input_file_name.c_str() );
+  std::cout << "DEBUG UniverseMaker::add_input_file - Point 4"<<std::endl;
 }
 
 void UniverseMaker::prepare_formulas() {
@@ -508,6 +504,7 @@ void UniverseMaker::prepare_formulas() {
   // singleton class
   const auto& eci = EventCategoryInterpreter::Instance();
   size_t num_categories = eci.label_map().size();
+  // std::cout<<"DEBUG prepare_formulas num_categories: "<<num_categories<<std::endl;
 
   // Create one TTreeFormula for each true bin definition
   for ( size_t tb = 0u; tb < true_bins_.size(); ++tb ) {
@@ -519,8 +516,11 @@ void UniverseMaker::prepare_formulas() {
 
     tbf->SetQuickLoad( true );
 
+    // std::cout<<"DEBUG prepare_formulas bin_def.signal_cuts_: "<<bin_def.signal_cuts_<<" - formula_name: "<<formula_name<<std::endl;
+
     true_bin_formulas_.emplace_back( std::move(tbf) );
   }
+  // std::cout<<"DEBUG prepare_formulas true_bin_formulas_.size(): "<<true_bin_formulas_.size()<<std::endl;
 
   // Create one TTreeFormula for each reco bin definition
   for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
@@ -565,7 +565,9 @@ void UniverseMaker::build_universes(
 void UniverseMaker::build_universes(
   const std::vector<std::string>* universe_branch_names )
 {
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 0"<<std::endl;
   int num_input_files = input_chain_.GetListOfFiles()->GetEntries();
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 1"<<std::endl;
   if ( num_input_files < 1 ) {
     std::cout << "ERROR: The UniverseMaker object has not been"
       " initialized with any input files yet.\n";
@@ -573,13 +575,17 @@ void UniverseMaker::build_universes(
   }
 
   WeightHandler wh;
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 2"<<std::endl;
   wh.set_branch_addresses( input_chain_, universe_branch_names );
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 3"<<std::endl;
 
   // Make sure that we always have branches set up for the CV correction
   // weights, i.e., the spline and tune weights. Don't throw an exception if
   // these are missing in the input TTree (we could be working with real data)
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
+
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 
   this->prepare_formulas();
 
@@ -589,6 +595,8 @@ void UniverseMaker::build_universes(
   is_mc = input_chain_.GetBranchStatus("mcEntryNumber");
 //  input_chain_.SetBranchAddress( "is_mc", &is_mc );
 
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 5"<<std::endl;
+
   // Get the first TChain entry so that we can know the number of universes
   // used in each vector of weights
   input_chain_.GetEntry( 0 );
@@ -596,8 +604,11 @@ void UniverseMaker::build_universes(
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
 
+  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 6"<<std::endl;
+
   int treenumber = 0;
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
+    if(entry%1000==0) std::cout<<"\rUniverseMaker::build_universes "<<entry<<" of "<<input_chain_.GetEntries()<<std::flush;
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
 
@@ -610,6 +621,8 @@ void UniverseMaker::build_universes(
       for ( auto& cbf : category_formulas_ ) cbf->Notify();
     }
 
+    // std::cout<<"DEBUG UniverseMaker::build_universes - Point 7"<<std::endl;
+
     // Find the reco bin(s) that should be filled for the current event
     std::vector< FormulaMatch > matched_reco_bins;
     for ( size_t rb = 0u; rb < reco_bin_formulas_.size(); ++rb ) {
@@ -617,9 +630,14 @@ void UniverseMaker::build_universes(
       int num_formula_elements = rbf->GetNdata();
       for ( int el = 0; el < num_formula_elements; ++el ) {
         double formula_wgt = rbf->EvalInstance( el );
-        if ( formula_wgt ) matched_reco_bins.emplace_back( rb, formula_wgt );
+        if ( formula_wgt ){
+          matched_reco_bins.emplace_back( rb, formula_wgt );
+          // std::cout<<" rb: "<<rb;
+        }
       }
     }
+
+    // std::cout<<"DEBUG UniverseMaker::build_universes - Point 8"<<std::endl;
 
     // Find the EventCategory label(s) that apply to the current event
     std::vector< FormulaMatch > matched_category_indices;
@@ -630,9 +648,12 @@ void UniverseMaker::build_universes(
         double formula_wgt = cbf->EvalInstance( el );
         if ( formula_wgt ) {
           matched_category_indices.emplace_back( c, formula_wgt );
+          // std::cout<<" c: "<<c;
         }
       }
     }
+
+    // std::cout<<"DEBUG UniverseMaker::build_universes - Point 9"<<std::endl;
 
     input_chain_.GetEntry( entry );
     //std::cout << "Entry " << entry << '\n';
@@ -640,6 +661,8 @@ void UniverseMaker::build_universes(
     std::vector< FormulaMatch > matched_true_bins;
     double spline_weight = 0.;
     double tune_weight = 0.;
+
+    // std::cout<<"DEBUG UniverseMaker::build_universes - Point 10"<<std::endl;
 
     // If we're working with an MC sample, then find the true bin(s)
     // that should be filled for the current event
@@ -649,9 +672,18 @@ void UniverseMaker::build_universes(
         int num_formula_elements = tbf->GetNdata();
         for ( int el = 0; el < num_formula_elements; ++el ) {
           double formula_wgt = tbf->EvalInstance( el );
-          if ( formula_wgt ) matched_true_bins.emplace_back( tb, formula_wgt );
+          if ( formula_wgt )
+          {
+            matched_true_bins.emplace_back( tb, formula_wgt );
+            // std::cout<<" tb: "<<tb;
+            // std::cout<<"DEBUG matched_true_bins.size(): "<<matched_true_bins.size()<<" formula_wgt: "<<formula_wgt<<" el: "<<el<<"/"<<num_formula_elements<<" tb: "<<tb<<"/"<<true_bin_formulas_.size()<<std::endl;
+          }
         }
       } // true bins
+      // std::cout<<std::endl; // todo remove
+      // if(matched_true_bins.empty()) throw std::runtime_error( "No true bins matched - Should at least be in background bins" );
+
+      // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 11"<<std::endl;
 
       // If we have event weights in the map at all, then get the current
       // event's CV correction weights here for potentially frequent re-use
@@ -663,11 +695,16 @@ void UniverseMaker::build_universes(
       }
     } // MC event
 
+    // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 12"<<std::endl;
+
     for ( const auto& pair : wh.weight_map() ) {
       const std::string& wgt_name = pair.first;
+      // std::cout<<"DEBUG wgt_name: "<<wgt_name<<std::endl;
       const auto& wgt_vec = pair.second;
 
       auto& u_vec = universes_.at( wgt_name );
+
+      // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 13"<<std::endl;
 
       for ( size_t u = 0u; u < wgt_vec->size(); ++u ) {
 
@@ -693,13 +730,9 @@ void UniverseMaker::build_universes(
             universe.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
               tb.weight_ * rb.weight_ * safe_wgt );
           } // reco bins
-
-          for ( const auto& other_tb : matched_true_bins ) {
-            universe.hist_true2d_->Fill( tb.bin_index_, other_tb.bin_index_,
-              tb.weight_ * other_tb.weight_ * safe_wgt );
-          } // true bins
-
         } // true bins
+
+        // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 14"<<std::endl;
 
         for ( const auto& rb : matched_reco_bins ) {
           universe.hist_reco_->Fill( rb.bin_index_, rb.weight_ * safe_wgt );
@@ -707,6 +740,7 @@ void UniverseMaker::build_universes(
           for ( const auto& c : matched_category_indices ) {
             universe.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
               c.weight_ * rb.weight_ * safe_wgt );
+            // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<" safe_wgt: "<<safe_wgt<<std::endl;
           }
 
           for ( const auto& other_rb : matched_reco_bins ) {
@@ -715,25 +749,23 @@ void UniverseMaker::build_universes(
           }
         } // reco bins
       } // universes
+      // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 15"<<std::endl;
     } // weight names
+
+    // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 16"<<std::endl;
 
     // Fill the unweighted histograms now that we're done with the
     // weighted ones. Note that "unweighted" in this context applies to
     // the universe event weights, but that any implicit weights from
     // the TTreeFormula evaluations will still be applied.
     auto& univ = universes_.at( UNWEIGHTED_NAME ).front();
+    // std::cout<<"DEBUG UNWEIGHTED_NAME: "<<UNWEIGHTED_NAME<<std::endl;
     for ( const auto& tb : matched_true_bins ) {
       univ.hist_true_->Fill( tb.bin_index_, tb.weight_ );
       for ( const auto& rb : matched_reco_bins ) {
         univ.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
           tb.weight_ * rb.weight_ );
       } // reco bins
-
-      for ( const auto& other_tb : matched_true_bins ) {
-        univ.hist_true2d_->Fill( tb.bin_index_, other_tb.bin_index_,
-          tb.weight_ * other_tb.weight_ );
-      } // true bins
-
     } // true bins
 
     for ( const auto& rb : matched_reco_bins ) {
@@ -743,6 +775,7 @@ void UniverseMaker::build_universes(
       for ( const auto& c : matched_category_indices ) {
         univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
           c.weight_ * rb.weight_ );
+          // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
       }
 
       for ( const auto& other_rb : matched_reco_bins ) {
@@ -751,10 +784,12 @@ void UniverseMaker::build_universes(
       }
 
     } // reco bins
+    // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 17"<<std::endl;
 
   } // TChain entries
 
   input_chain_.ResetBranchAddresses();
+  // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 18"<<std::endl;
 }
 
 void UniverseMaker::prepare_universes( const WeightHandler& wh ) {
@@ -787,6 +822,7 @@ void UniverseMaker::save_histograms(
   const std::string& subdirectory_name,
   bool update_file )
 {
+  // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 0"<<std::endl;
   // Decide whether to overwrite the output file or simply update the contents.
   // This difference is only important if the output file already exists before
   // this function is called.
@@ -795,7 +831,11 @@ void UniverseMaker::save_histograms(
     tfile_option = "update";
   }
 
+  // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 1"<<std::endl;
+
   TFile out_file( output_file_name.c_str(), tfile_option.c_str() );
+
+  // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 2"<<std::endl;
 
   // Navigate to the subdirectory within the output ROOT file where the
   // response matrix histograms will be saved. Create new TDirectoryFile
@@ -810,6 +850,8 @@ void UniverseMaker::save_histograms(
     root_tdir = new TDirectoryFile( output_directory_name_.c_str(),
       "response matrices", "", &out_file );
   }
+
+  // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 3"<<std::endl;
 
   // Save the configuration settings for this class to the main
   // TDirectoryFile before moving on to the appropriate subdirectory. If
@@ -839,6 +881,8 @@ void UniverseMaker::save_histograms(
   root_tdir->GetObject( TRUE_BIN_SPEC_NAME.c_str(), saved_tb_spec );
   root_tdir->GetObject( RECO_BIN_SPEC_NAME.c_str(), saved_rb_spec );
 
+  // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 4"<<std::endl;
+
   if ( saved_tree_name ) {
     if ( tree_name != *saved_tree_name ) {
       throw std::runtime_error( "Tree name mismatch: " + tree_name
@@ -867,6 +911,8 @@ void UniverseMaker::save_histograms(
     root_tdir->WriteObject( &reco_bin_spec, RECO_BIN_SPEC_NAME.c_str() );
   }
 
+  // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 5"<<std::endl;
+
   std::string subdir_name = ntuple_subfolder_from_file_name(
     subdirectory_name );
 
@@ -881,9 +927,16 @@ void UniverseMaker::save_histograms(
   // out the histograms.
   sub_tdir->cd();
 
+    // std::cout<<"DEBUG UniverseMaker::save_histograms - Point 6"<<std::endl;
+
+  unsigned int iweights = 0;
   for ( auto& pair : universes_ ) {
     auto& u_vec = pair.second;
+    unsigned int iuni = 0;
+    iweights++;
     for ( auto& univ : u_vec ) {
+      iuni++;
+      std::cout<<"\r"<<iweights<<"/"<<universes_.size()<<" weights ("<<pair.first<<") - "<<iuni<<"/"<<u_vec.size()<<" universes                    "<<std::flush;
       // Always save the reco histograms
       univ.hist_reco_->Write();
       univ.hist_reco2d_->Write();
@@ -894,8 +947,9 @@ void UniverseMaker::save_histograms(
         univ.hist_true_->Write();
         univ.hist_2d_->Write();
         univ.hist_categ_->Write();
-        univ.hist_true2d_->Write();
       }
+      else std::cout<<"DEBUG - No entries "<<pair.first<<" "<<iuni<<std::flush;
     } // universes
   } // weight names
+  std::cout<<"\nDEBUG ---- Done ---"<<std::endl;
 }

@@ -316,6 +316,8 @@ std::cout << "Size: " << nbins.size() << std::endl;
   for ( int t = 0; t < nbins.size() - 1; ++t ) { 
       fake_data_truth_vals->SetBinContent( t + 1, fake_data_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
       genie_cv_truth_vals->SetBinContent( t + 1, genie_cv_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
+      std::cout << "fake: " << fake_data_truth->GetBinContent(t + 1) << std::endl;
+      std::cout << "geni: " << genie_cv_truth->GetBinContent(t + 1) << std::endl;
   }
 
  // for ( int t = 0; t < result.cov_matrix_->GetNcols() ; ++t ) {

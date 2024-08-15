@@ -154,7 +154,7 @@ void tutorial_slice_plots() {
     // in the ROOT plot. All configured fractional uncertainties will be
     // included in the output pgfplots file regardless of whether they appear
     // in this vector.
-    const std::vector< std::string > cov_mat_keys = { "total" };
+    const std::vector< std::string > cov_mat_keys = { "total","flux_total","xsec_total" };
  
 /*    const std::vector< std::string > cov_mat_keys = { "total",
       "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
