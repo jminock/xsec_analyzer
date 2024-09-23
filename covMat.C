@@ -89,6 +89,32 @@ struct SystInfo {
 };
 
 const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
+/*
+  { "flux_expskin", {"weight_expskin_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_horncurrent", {"weight_horncurrent_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_kminus", {"weight_kminus_PrimaryHadronNormalization_", 1000u, false, true, true} },
+
+  { "flux_kplus", {"weight_kplus_PrimaryHadronFeynmanScaling_", 1000u, false, true, true} },
+
+  { "flux_kzero", {"weight_kzero_PrimaryHadronSanfordWang_", 1000u, false, true, true} },
+
+  { "flux_nucleoninexsec", {"weight_nucleoninexsec_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_nucleonqexsec", {"weight_nucleonqexsec_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_nucleontotxsec", {"weight_nucleontotxsec_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_piminus", {"weight_piminus_PrimaryHadronSWCentralSplineVariation_", 1000u, false, true, true} },
+
+  { "flux_pioninexsec", {"weight_pioninexsec_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_pionqexsec", {"weight_pionqexsec_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_piontotxsec", {"weight_piontotxsec_FluxUnisim_", 1000u, false, true, true} },
+
+  { "flux_piplus", {"weight_piplus_PrimaryHadronSWCentralSplineVariation_", 1000u, false, true, true} },
 
   { "flux", {"weight_flux_all_", 1000u, false, true, true} },
 
@@ -129,7 +155,7 @@ const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
 
   { "xsec_xsr_scc_Fv3_SCC", {"weight_xsr_scc_Fv3_SCC_", 10u,
     false, true, false} },
-
+*/
 };
 
 CovMatResults make_cov_mat( const std::string& cov_mat_name,

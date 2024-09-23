@@ -25,8 +25,8 @@
 bool is_reweightable_mc_ntuple( const std::string& input_file_name ) {
   TFile temp_file( input_file_name.c_str(), "read" );
   TTree* stv_tree = nullptr;
-  temp_file.GetObject( "stv_tree", stv_tree );
-  if ( !stv_tree ) throw std::runtime_error( "Missing TTree \"stv_tree\" in"
+  temp_file.GetObject( "phaseIITriggerTree", stv_tree );
+  if ( !stv_tree ) throw std::runtime_error( "Missing TTree \"phaseIITriggerTree\" in"
     " the input ROOT file " + input_file_name );
 
   TBranch* cv_weight_br = stv_tree->GetBranch( TUNE_WEIGHT_NAME.c_str() );

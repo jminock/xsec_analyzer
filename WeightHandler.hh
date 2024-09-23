@@ -74,7 +74,8 @@ void WeightHandler::set_branch_addresses( TTree& in_tree,
       // The user didn't supply a vector of branch names, so resort to
       // automatic detection. Include any branch whose name begins with
       // the string "weight_".
-      const std::string wgt_br_prefix = "weight_";
+//      const std::string wgt_br_prefix = "weight_";
+      const std::string wgt_br_prefix = "nope";
       int compare_result = br_name.compare( 0, wgt_br_prefix.size(),
         wgt_br_prefix );
       include_branch = ( compare_result == 0 );
