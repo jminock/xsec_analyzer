@@ -1,0 +1,14 @@
+tutorial_1D_proton
+phaseIITriggerTree
+5
+0 1 "trueCC && trueMuonEnergy >= 600 && trueMuonEnergy < 810"
+0 1 "trueCC && trueMuonEnergy >= 810 && trueMuonEnergy < 910"
+0 1 "trueCC && trueMuonEnergy >= 910 && trueMuonEnergy < 1005"
+0 1 "trueCC && trueMuonEnergy >= 1005 && trueMuonEnergy < 1100"
+0 1 "trueCC && trueMuonEnergy >= 1100 && trueMuonEnergy < 1200"
+5
+0 1 "numMRDTracks > 0 && simpleRecoEnergy + 130 >= 600 && simpleRecoEnergy + 130 < 810"
+0 1 "numMRDTracks > 0 && simpleRecoEnergy + 130 >= 810 && simpleRecoEnergy + 130 < 910"
+0 1 "numMRDTracks > 0 && simpleRecoEnergy + 130 >= 910 && simpleRecoEnergy + 130 < 1005"
+0 1 "numMRDTracks > 0 && simpleRecoEnergy + 130 >= 1005 && simpleRecoEnergy + 130 < 1100"
+0 1 "numMRDTracks > 0 && simpleRecoEnergy + 130 >= 1100 && simpleRecoEnergy + 130 < 1200"

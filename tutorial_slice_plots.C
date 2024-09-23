@@ -11,7 +11,7 @@
 // STV analysis includes
 #include "FilePropertiesManager.hh"
 #include "MCC9SystematicsCalculator.hh"
-#include "PlotUtils.hh"
+#include "includes/PlotUtils.hh"
 #include "SliceBinning.hh"
 #include "SliceHistogram.hh"
 

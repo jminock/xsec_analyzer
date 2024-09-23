@@ -1,13 +1,22 @@
-all: analyzer univmake chi_square_cc0pi
+CXX = g++
+CXXFLAGS = -g -Wall -fPIC -Wno-unused-variable
+ROOTFLAGS = `root-config --cflags --glibs --libs` -lTreePlayer -lEG -lMinuit
 
-univmake: univmake.C stv_root_dict.o
-	$(CXX) $(shell root-config --cflags --libs) -O3 -o $@ $^
 
-analyzer: analyzer.C stv_root_dict.o
-	$(CXX) $(shell root-config --cflags --libs) -O3 -o $@ $^
+# make a binary for every .cxx file
+# all : $(patsubst %.cpp, %.o, $(wildcard *.cpp)) chi_square_cc0pi_christian univmake
+ all : chi_square_cc0pi_christian univmake
+# cc0pi_analyzer_org
+# cc0pi_analyzer
+# # rule for each one
+# 
+%: %.cpp
+	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -o  $@ $< includes/*.o 
+	
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -o $*.o  -c $*.cpp 
+	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -o $* $*.o includes/*.o 
 
-chi_square_cc0pi: chi_square_cc0pi.cpp stv_root_dict.o
-	$(CXX) $(shell root-config --cflags --libs) -O3 -o $@ $^
 
 stv_root_dict.o:
 	$(RM) stv_root_dict*.*
@@ -15,10 +24,17 @@ stv_root_dict.o:
 	$(CXX) $(shell root-config --cflags --libs) -O3 \
 	-fPIC -o stv_root_dict.o -c stv_root_dict.cc
 	$(RM) stv_root_dict.cc
+	
+chi_square_cc0pi_christian: chi_square_cc0pi_christian.cpp
+	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -O3 -o $@ $^ includes/*.o
 
+univmake: univmake.C
+	 $(CXX) $(shell root-config --cflags --libs) -O3 -o $@ $^
+	
 .PHONY: clean
 
-#.INTERMEDIATE: stv_root_dict.o
+.INTERMEDIATE: stv_root_dict.o
 
 clean:
-	$(RM) univmake analyzer chi_square_cc0pi stv_root_dict.o stv_root_dict_rdict.pcm
+	rm -f $(wildcard *.o) $(patsubst %.cpp, %, $(wildcard *.cpp)) chi_square_cc0pi_christian univmake
+

@@ -776,6 +776,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
 
         // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 13" << std::endl;
         run_to_ext_trigs_map.at(run) += pot_and_trigs.trigger_count_;
+        std::cout << "DEBUG: pot_and_trigs.trigger_count_: " << pot_and_trigs.trigger_count_ << std::endl;
         // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 14" << std::endl;
       } // EXT files
     // }
@@ -1225,7 +1226,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
               {
                 rw_universes_[univ_name] = std::vector<std::unique_ptr<Universe>>();
                 std::cout<<"DEBUG univ_name: "<< univ_name << " in file: " << file_name <<std::endl;
-                // std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 3 rw_universes_.at(univ_name).index_: "<<rw_universes_.at(univ_name).back()->index_<<std::endl;
+                //std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 3 rw_universes_.at(univ_name).index_: "<<rw_universes_.at(univ_name).back()->index_<<std::endl;
               }
               std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 3.1"<<std::endl;
               // Move this universe into the map. Note that the automatic
@@ -1255,7 +1256,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
             std::string univ_name = rw_pair.first;
             std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.1 univ_name: " << univ_name << std::endl;
             auto &univ_vec = rw_pair.second;
-
+//QQQQQ
             for (size_t u_idx = 0u; u_idx < univ_vec.size(); ++u_idx)
             {
               std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.2 u_idx: " << u_idx << std::endl;

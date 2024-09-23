@@ -661,6 +661,7 @@ void UniverseMaker::build_universes(
     std::vector< FormulaMatch > matched_true_bins;
     double spline_weight = 0.;
     double tune_weight = 0.;
+//  double tune_weight = 0.;
 
     // std::cout<<"DEBUG UniverseMaker::build_universes - Point 10"<<std::endl;
 

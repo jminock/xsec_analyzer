@@ -89,7 +89,7 @@ struct SystInfo {
 };
 
 const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
-
+/*
   { "flux_expskin", {"weight_expskin_FluxUnisim_", 1000u, false, true, true} },
 
   { "flux_horncurrent", {"weight_horncurrent_FluxUnisim_", 1000u, false, true, true} },
@@ -155,7 +155,7 @@ const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
 
   { "xsec_xsr_scc_Fv3_SCC", {"weight_xsr_scc_Fv3_SCC_", 10u,
     false, true, false} },
-
+*/
 };
 
 CovMatResults make_cov_mat( const std::string& cov_mat_name,
