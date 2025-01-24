@@ -73,6 +73,7 @@ UnfoldedMeasurement Unfolder::unfold(
 {
   // Extract the inputs needed for the unfolding procedure from the
   // supplied SystematicsCalculator object
+  std::cout << "AAA111" << std::endl;
   auto smearcept = syst_calc.get_cv_smearceptance_matrix();
   auto true_signal = syst_calc.get_cv_true_signal();
   auto meas = syst_calc.get_measured_events();
@@ -149,6 +150,7 @@ UnfoldedMeasurement Unfolder::blockwise_unfold( const TMatrixD& data_signal,
   // ordinary reco bin indices. This will be used below to extract each
   // individual block from the input matrices.
   std::map< int, BlockBins > block_map;
+  std::cout << "ZZZZZZ" << std::endl;
   for ( size_t tb = 0u; tb < true_bins.size(); ++tb ) {
     const auto& tbin = true_bins.at( tb );
     if ( tbin.type_ == TrueBinType::kSignalTrueBin ) {
@@ -170,7 +172,7 @@ UnfoldedMeasurement Unfolder::blockwise_unfold( const TMatrixD& data_signal,
   }
 
   // TODO: add sanity checks of the block definitions
-
+  std::cout << "AAAAAA" << std::endl;
   // Create a single-column TMatrixD with the same number of true bins as the
   // prior. This will be used to combine the unfolded true bin counts from the
   // blocks to produce a final result.
@@ -179,6 +181,7 @@ UnfoldedMeasurement Unfolder::blockwise_unfold( const TMatrixD& data_signal,
   // Zero out the initial elements, just in case
   unfolded_signal->Zero();
 
+  std::cout << "BBBBBB" << std::endl;
   // Create a TMatrixD to hold the measurement error propagation matrix
   // aggregated across all blocks. This will be used to obtain the full
   // covariance matrix on the unfolded bin counts (including inter-block

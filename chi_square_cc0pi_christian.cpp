@@ -113,7 +113,7 @@ void chi_square_all_gens(std::string infiles) {
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
    
    //  std::vector<double> nbins = {0.8,0.95,1.0};
-     std::vector<double> nbins = {600.,810.,910.,1005.,1100.,1200};
+     std::vector<double> nbins = {600.,740.,860.,1000.,1100.,1200};
    
      //-------Most up-to-date root file for Genie Closure test----------//
      //auto* mcc9 = new MCC9SystematicsCalculator("./univmake_verified/genie_closure_test/univmake_costheta_closure_runs_1-3_April_17th.root", "systcalc.conf" ); 
@@ -655,7 +655,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
    
    //  std::vector<double> nbins = {0.8,0.95,1.0};
-     std::vector<double> nbins = {600.,810.,910.,1005.,1100.,1200};
+     std::vector<double> nbins = {600.,740.,860.,1000.,1100.,1200};
    
    
    
@@ -743,7 +743,6 @@ std::string text_title_pdf2_string(text_title_pdf2);
   const auto& fake_data_univ = mcc9->fake_data_universe();
   TH1D* fake_data_truth = fake_data_univ->hist_true_.get(); 
   TH1D* fake_data_reco = fake_data_univ->hist_reco_.get(); 
-  std::cout << "AAAA" << std::endl;
 
   Draw_STACK_HIST(
    reco_bnb_hist,
