@@ -1,2 +1,2 @@
 /exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_bg2_ntuple.root
-/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_large_unweighted_ntuple.root
+/pnfs/annie/persistent/users/jminock/v1_3_0_ntuples/PhaseIITree_400k_ntuple.root

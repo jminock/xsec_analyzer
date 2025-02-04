@@ -670,7 +670,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
 
   TH1D* genie_cv_truth_vals = new TH1D("genie_cv_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* fake_data_truth_vals = new TH1D("fake_data_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
-  TH1D* unfolded_events_vals = new TH1D("unfolded_events_vals", ";cos#theta_{#mu}; Scaled Events", nbins.size() - 1, nbins.data());
+  TH1D* unfolded_events_vals = new TH1D("unfolded_events_vals", ";p_{#mu}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* fake_data_reco_vals = new TH1D("fake_data_reco_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
 
 
@@ -922,7 +922,8 @@ std::string text_title_pdf2_string(text_title_pdf2);
        }
    }
   
-  leg->AddEntry(genie_cv_truth_vals,"MicroBooNE Tune","l");
+//  leg->AddEntry(genie_cv_truth_vals,"MicroBooNE Tune","l");
+  leg->AddEntry(genie_cv_truth_vals,"GENIE CV Truth","l");
   double dof = inv_cov_mat->GetNrows();
   double p_value = TMath::Prob(chi_square_cv, dof);
   std::cout<<"chi_square is: "<<chi_square_cv<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
@@ -938,7 +939,8 @@ std::string text_title_pdf2_string(text_title_pdf2);
         }
    }
 
-  leg->AddEntry(fake_data_truth_vals,"Truth (NuWro)","l");
+//  leg->AddEntry(fake_data_truth_vals,"Truth (NuWro)","l");
+  leg->AddEntry(fake_data_truth_vals,"Truth (Fake Data)","l");
   p_value = TMath::Prob(chi_square_fake, dof);
   sigma = RooStats::PValueToSignificance(p_value);
   std::cout<<"chi_square is: "<<chi_square_fake<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
@@ -952,7 +954,8 @@ std::string text_title_pdf2_string(text_title_pdf2);
   //unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dp_{#mu}} [ 10^{-38} #frac{cm^{2}}{GeV/c Ar} ]"); 
   //unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dcos#theta_{#mu}} [ 10^{-38} #frac{cm^{2}}{Ar} ]"); 
   auto max = genie_cv_truth_vals->GetMaximum()*1.8; 
-  unfolded_events_vals->GetYaxis()->SetTitle("Number of events"); 
+//  unfolded_events_vals->GetYaxis()->SetTitle("Number of events"); 
+  unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dp_{#mu}} [ 10^{-38} #frac{cm^{2}}{MeV/c O} ]"); 
   //unfolded_events_vals->GetYaxis()->SetRangeUser(4000.,116000.);
   unfolded_events_vals->SetMaximum(max);
   unfolded_events_vals->Draw("e"); //DRAW
@@ -991,8 +994,10 @@ std::string text_title_pdf2_string(text_title_pdf2);
   genie_cv_truth_vals->SetLineStyle( 2 );
   genie_cv_truth_vals->Draw( "hist same" ); //DRAW
   
-  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
+//  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
+  leg->AddEntry(unfolded_events_vals,"Unfolded Fake BNB data","l");
 leg->Draw();
+  c2->SetLeftMargin(0.2);
   c2->SaveAs(text_title_pdf2);  
 
 
