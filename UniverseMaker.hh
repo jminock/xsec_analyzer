@@ -90,6 +90,11 @@ void apply_cv_correction_weights( const std::string& wgt_name,
     wgt *= 1.;
   }
   else if ( wgt_name == "weight_flux_all"
+    || string_has_end(wgt_name, "_FluxUnisim")
+    || string_has_end(wgt_name, "_PrimaryHadronNormalization")
+    || string_has_end(wgt_name, "_PrimaryHadronFeynmanScaling")
+    || string_has_end(wgt_name, "_PrimaryHadronSanfordWang")
+    || string_has_end(wgt_name, "_PrimaryHadronSWCentralSplineVariation")
     || wgt_name == "weight_reint_all"
     || wgt_name == "weight_xsr_scc_Fa3_SCC"
     || wgt_name == "weight_xsr_scc_Fv3_SCC" )
@@ -101,7 +106,10 @@ void apply_cv_correction_weights( const std::string& wgt_name,
     // No extra weight factors needed
     return;
   }
-  else throw std::runtime_error( "Unrecognized weight name" );
+  else {
+    std::cout << wgt_name << std::endl;
+    throw std::runtime_error( "Unrecognized weight name" );
+  }
 }
 
 // Enum used to label bin types in true space
