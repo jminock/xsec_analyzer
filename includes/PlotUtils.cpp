@@ -3202,7 +3202,6 @@ void Draw_STACK_HIST(
    std::string pdf_name )
 {
 
-  std::cout << "BBBBBB" << std::endl;
   char textplace[1024];
   TH1D *hist_1_temp = (TH1D *)hist_1_input->Clone("");
   TH1D *hist_2_temp = (TH1D *)hist_2_input->Clone("");
@@ -3211,19 +3210,16 @@ void Draw_STACK_HIST(
   THStack* hs = new THStack("hs","Event Rates");
   std::vector<double> nbins = {600.,810.,910.,1005.,1100.,1200};
 
-  std::cout << "CCCCC" << std::endl;
   TH1D *hist_1 = new TH1D("hist_1", ";E_{muon};", nbins.size() - 1, nbins.data());
   TH1D *hist_2 = new TH1D("hist_2", ";E_{muon};", nbins.size() - 1, nbins.data());
   TH1D *hist_3 = new TH1D("hist_3", ";E_{muon};", nbins.size() - 1, nbins.data());
 
-  std::cout << "DDDDD" << std::endl;
   for(int i = 1; i < nbins.size(); i++){
     hist_1->SetBinContent(i, hist_1_temp->GetBinContent(i));
     hist_2->SetBinContent(i, hist_2_temp->GetBinContent(i));
     hist_3->SetBinContent(i, hist_3_temp->GetBinContent(i));
   }
 
-  std::cout << "EEEEE" << std::endl;
   TLegend *legend = new TLegend (.1 , .75, .3 , .9 );
   
   if (Setgrid==true) cE->SetGrid();
@@ -3247,7 +3243,6 @@ void Draw_STACK_HIST(
     hist_3->Scale(1.0,"width");
   }
 
-  std::cout << "FFFF" << std::endl;
   if(Ymax != -99){
     hs->SetMaximum(Ymax);
   }  
@@ -3259,7 +3254,6 @@ void Draw_STACK_HIST(
     hs->SetMaximum(Max* 1.4);
   }
        
-  std::cout << "GGGG" << std::endl;     
   int nbins_1 = hist_1->GetNbinsX();
   double Mean = hist_1->GetMean(1);
   double stdDev = hist_1->GetStdDev(1);
@@ -3271,7 +3265,6 @@ void Draw_STACK_HIST(
   double area_1 = hist_1->Integral();
   double area_2 = hist_2->Integral();
    
-   std::cout << "HHHHHH" << std::endl;
   legend -> AddEntry(hist_1, legend_Title1, "l");
   legend -> AddEntry(hist_2, legend_Title2, "l");
   legend -> AddEntry(hist_3, legend_Title3, "l");
@@ -3281,17 +3274,13 @@ void Draw_STACK_HIST(
   text->SetTextSize(0.03);
   text->SetTextColor(kRed);
 
-  std::cout << "IIIIII" << std::endl;
 //  hs->GetXaxis()->SetTitleSize(0.03);
-  std::cout << "WWWWWW" << std::endl;
   hs->SetMinimum(0.0);
 
-  std::cout << "JJJJJJ" << std::endl;
   hs->Add(hist_1);
   hs->Add(hist_2);
   hs->Add(hist_3);
 
-  std::cout << "ZZZZZ" << std::endl;
   hs->Draw("nostack e");
 //  hist_2->Draw("SAME hist e");
   legend->Draw("SAME");  

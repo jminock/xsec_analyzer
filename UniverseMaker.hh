@@ -86,20 +86,30 @@ void apply_cv_correction_weights( const std::string& wgt_name,
   double& wgt, double spline_weight, double tune_weight )
 {
   if ( string_has_end(wgt_name, "UBGenie") ) {
-    wgt *= spline_weight;
+//    wgt *= spline_weight;
+    wgt *= 1.;
   }
   else if ( wgt_name == "weight_flux_all"
+    || string_has_end(wgt_name, "_FluxUnisim")
+    || string_has_end(wgt_name, "_PrimaryHadronNormalization")
+    || string_has_end(wgt_name, "_PrimaryHadronFeynmanScaling")
+    || string_has_end(wgt_name, "_PrimaryHadronSanfordWang")
+    || string_has_end(wgt_name, "_PrimaryHadronSWCentralSplineVariation")
     || wgt_name == "weight_reint_all"
     || wgt_name == "weight_xsr_scc_Fa3_SCC"
     || wgt_name == "weight_xsr_scc_Fv3_SCC" )
   {
-    wgt *= spline_weight * tune_weight;
+//    wgt *= spline_weight * tune_weight;
+    wgt *= tune_weight;
   }
   else if ( wgt_name == SPLINE_WEIGHT_NAME ) {
     // No extra weight factors needed
     return;
   }
-  else throw std::runtime_error( "Unrecognized weight name" );
+  else {
+    std::cout << wgt_name << std::endl;
+    throw std::runtime_error( "Unrecognized weight name" );
+  }
 }
 
 // Enum used to label bin types in true space
@@ -565,9 +575,9 @@ void UniverseMaker::build_universes(
 void UniverseMaker::build_universes(
   const std::vector<std::string>* universe_branch_names )
 {
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 0"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 0"<<std::endl;
   int num_input_files = input_chain_.GetListOfFiles()->GetEntries();
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 1"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 1"<<std::endl;
   if ( num_input_files < 1 ) {
     std::cout << "ERROR: The UniverseMaker object has not been"
       " initialized with any input files yet.\n";
@@ -575,9 +585,9 @@ void UniverseMaker::build_universes(
   }
 
   WeightHandler wh;
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 2"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 2"<<std::endl;
   wh.set_branch_addresses( input_chain_, universe_branch_names );
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 3"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 3"<<std::endl;
 
   // Make sure that we always have branches set up for the CV correction
   // weights, i.e., the spline and tune weights. Don't throw an exception if
@@ -585,7 +595,7 @@ void UniverseMaker::build_universes(
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 
   this->prepare_formulas();
 
@@ -595,7 +605,7 @@ void UniverseMaker::build_universes(
   is_mc = input_chain_.GetBranchStatus("mcEntryNumber");
 //  input_chain_.SetBranchAddress( "is_mc", &is_mc );
 
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 5"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 5"<<std::endl;
 
   // Get the first TChain entry so that we can know the number of universes
   // used in each vector of weights
@@ -604,7 +614,7 @@ void UniverseMaker::build_universes(
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
 
-  // std::cout<<"DEBUG UniverseMaker::build_universes - Point 6"<<std::endl;
+  std::cout<<"DEBUG UniverseMaker::build_universes - Point 6"<<std::endl;
 
   int treenumber = 0;
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
@@ -714,7 +724,7 @@ void UniverseMaker::build_universes(
         double w = wgt_vec->operator[]( u );
 
         // Multiply by any needed CV correction weights
-//        apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
+        apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
 
         // Deal with NaNs, etc. to make a "safe weight" in all cases
         double safe_wgt = safe_weight( w );
@@ -750,17 +760,17 @@ void UniverseMaker::build_universes(
           }
         } // reco bins
       } // universes
-      // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 15"<<std::endl;
+      //std::cout<<"DEBUG UniverseMaker::build_universes - Point 15"<<std::endl;
     } // weight names
 
-    // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 16"<<std::endl;
+    //std::cout<<"DEBUG UniverseMaker::build_universes - Point 16"<<std::endl;
 
     // Fill the unweighted histograms now that we're done with the
     // weighted ones. Note that "unweighted" in this context applies to
     // the universe event weights, but that any implicit weights from
     // the TTreeFormula evaluations will still be applied.
     auto& univ = universes_.at( UNWEIGHTED_NAME ).front();
-    // std::cout<<"DEBUG UNWEIGHTED_NAME: "<<UNWEIGHTED_NAME<<std::endl;
+    //std::cout<<"DEBUG UNWEIGHTED_NAME: "<<UNWEIGHTED_NAME<<std::endl;
     for ( const auto& tb : matched_true_bins ) {
       univ.hist_true_->Fill( tb.bin_index_, tb.weight_ );
       for ( const auto& rb : matched_reco_bins ) {
@@ -776,7 +786,7 @@ void UniverseMaker::build_universes(
       for ( const auto& c : matched_category_indices ) {
         univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
           c.weight_ * rb.weight_ );
-          // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
+          //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
       }
 
       for ( const auto& other_rb : matched_reco_bins ) {

@@ -1,5 +1,5 @@
 3
-"reco E_{\mu}" "MeV" "reco $E_{\mu}$" "MeV"
+"reco P_{\mu}" "MeV" "reco $P_{\mu}$" "MeV"
 "reco cos#theta_{\mu}" "" "reco $\cos\theta_{\mu}$" ""
 "reco bin number" "" "reco bin number" ""
 3
@@ -10,7 +10,7 @@
 5 1 1
 6 1 2
 "events / POT"
-1 0 6 600 810 910 1005 1100 1200
+1 0 6 600 740 860 1000 1100 1200
 0
 5
 0 1 1

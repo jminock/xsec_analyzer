@@ -113,7 +113,7 @@ void chi_square_all_gens(std::string infiles) {
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
    
    //  std::vector<double> nbins = {0.8,0.95,1.0};
-     std::vector<double> nbins = {600.,810.,910.,1005.,1100.,1200};
+     std::vector<double> nbins = {600.,740.,860.,1000.,1100.,1200};
    
      //-------Most up-to-date root file for Genie Closure test----------//
      //auto* mcc9 = new MCC9SystematicsCalculator("./univmake_verified/genie_closure_test/univmake_costheta_closure_runs_1-3_April_17th.root", "systcalc.conf" ); 
@@ -655,7 +655,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
    
    //  std::vector<double> nbins = {0.8,0.95,1.0};
-     std::vector<double> nbins = {600.,810.,910.,1005.,1100.,1200};
+     std::vector<double> nbins = {600.,740.,860.,1000.,1100.,1200};
    
    
    
@@ -670,7 +670,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
 
   TH1D* genie_cv_truth_vals = new TH1D("genie_cv_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* fake_data_truth_vals = new TH1D("fake_data_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
-  TH1D* unfolded_events_vals = new TH1D("unfolded_events_vals", ";cos#theta_{#mu}; Scaled Events", nbins.size() - 1, nbins.data());
+  TH1D* unfolded_events_vals = new TH1D("unfolded_events_vals", ";p_{#mu}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* fake_data_reco_vals = new TH1D("fake_data_reco_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
 
 
@@ -743,7 +743,6 @@ std::string text_title_pdf2_string(text_title_pdf2);
   const auto& fake_data_univ = mcc9->fake_data_universe();
   TH1D* fake_data_truth = fake_data_univ->hist_true_.get(); 
   TH1D* fake_data_reco = fake_data_univ->hist_reco_.get(); 
-  std::cout << "AAAA" << std::endl;
 
   Draw_STACK_HIST(
    reco_bnb_hist,
@@ -923,7 +922,8 @@ std::string text_title_pdf2_string(text_title_pdf2);
        }
    }
   
-  leg->AddEntry(genie_cv_truth_vals,"MicroBooNE Tune","l");
+//  leg->AddEntry(genie_cv_truth_vals,"MicroBooNE Tune","l");
+  leg->AddEntry(genie_cv_truth_vals,"GENIE CV Truth","l");
   double dof = inv_cov_mat->GetNrows();
   double p_value = TMath::Prob(chi_square_cv, dof);
   std::cout<<"chi_square is: "<<chi_square_cv<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
@@ -939,7 +939,8 @@ std::string text_title_pdf2_string(text_title_pdf2);
         }
    }
 
-  leg->AddEntry(fake_data_truth_vals,"Truth (NuWro)","l");
+//  leg->AddEntry(fake_data_truth_vals,"Truth (NuWro)","l");
+  leg->AddEntry(fake_data_truth_vals,"Truth (Fake Data)","l");
   p_value = TMath::Prob(chi_square_fake, dof);
   sigma = RooStats::PValueToSignificance(p_value);
   std::cout<<"chi_square is: "<<chi_square_fake<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
@@ -953,7 +954,8 @@ std::string text_title_pdf2_string(text_title_pdf2);
   //unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dp_{#mu}} [ 10^{-38} #frac{cm^{2}}{GeV/c Ar} ]"); 
   //unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dcos#theta_{#mu}} [ 10^{-38} #frac{cm^{2}}{Ar} ]"); 
   auto max = genie_cv_truth_vals->GetMaximum()*1.8; 
-  unfolded_events_vals->GetYaxis()->SetTitle("Number of events"); 
+//  unfolded_events_vals->GetYaxis()->SetTitle("Number of events"); 
+  unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dp_{#mu}} [ 10^{-38} #frac{cm^{2}}{MeV/c O} ]"); 
   //unfolded_events_vals->GetYaxis()->SetRangeUser(4000.,116000.);
   unfolded_events_vals->SetMaximum(max);
   unfolded_events_vals->Draw("e"); //DRAW
@@ -992,8 +994,10 @@ std::string text_title_pdf2_string(text_title_pdf2);
   genie_cv_truth_vals->SetLineStyle( 2 );
   genie_cv_truth_vals->Draw( "hist same" ); //DRAW
   
-  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
+//  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
+  leg->AddEntry(unfolded_events_vals,"Unfolded Fake BNB data","l");
 leg->Draw();
+  c2->SetLeftMargin(0.2);
   c2->SaveAs(text_title_pdf2);  
 
 

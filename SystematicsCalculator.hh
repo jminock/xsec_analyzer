@@ -858,7 +858,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
           if ( temp_pot == 0 ) throw std::runtime_error( "Missing POT in MC file!" );
 //          file_pot = temp_pot->GetVal();
           file_pot = temp_pot;
-          file_pot = 1.56e+19; //ACTUALLY FIX THIS SO IT'S NOT 3.2545e16
+          file_pot = 1.5297e+20; //ACTUALLY FIX THIS SO IT'S NOT 3.2545e16
         }
         else
         {
@@ -873,15 +873,15 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
         std::string subdir_name = ntuple_subfolder_from_file_name(
             file_name);
 
-        // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 23 - subdir_name: " << subdir_name << std::endl;
+        std::cout << "DEBUG SystematicsCalculator::build_universes() Point 23 - subdir_name: " << subdir_name << std::endl;
         TDirectoryFile *subdir = nullptr;
         root_tdir.GetObject(subdir_name.c_str(), subdir);
-        // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 23.1" << std::endl;
+        std::cout << "DEBUG SystematicsCalculator::build_universes() Point 23.1" << std::endl;
         if (!subdir)
           throw std::runtime_error(
               "Missing TDirectoryFile " + subdir_name);
 
-        // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 23.2" << std::endl;
+        std::cout << "DEBUG SystematicsCalculator::build_universes() Point 23.2" << std::endl;
         // For data, just add the reco-space event counts to the total,
         // scaling to the beam-on triggers in the case of EXT data
         if (!is_mc)
@@ -984,7 +984,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
 
         } // data ntuple files
 
-        // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 25" << std::endl;
+        std::cout << "DEBUG SystematicsCalculator::build_universes() Point 25" << std::endl;
         // If we've made it here, then we're working with an MC ntuple
         // file. For these, all four histograms for the "unweighted"
         // universe are always evaluated. Use this to determine the number
@@ -992,13 +992,14 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
         auto temp_2d_hist = get_object_unique_ptr<TH2D>(
             "unweighted_0_2d", *subdir);
 
+	if(temp_2d_hist == NULL) std::cout << "AAAAA" << std::endl;
         // NOTE: the convention of the UniverseMaker class is to use
         // x as the true axis and y as the reco axis.
         int num_true_bins = temp_2d_hist->GetXaxis()->GetNbins();
         int num_reco_bins = temp_2d_hist->GetYaxis()->GetNbins();
 
         // Let's handle the fake BNB data samples first.
-        // std::cout << "DEBUG SystematicsCalculator::build_universes() Point 26" << std::endl;
+        std::cout << "DEBUG SystematicsCalculator::build_universes() Point 26" << std::endl;
         if (is_fake_data)
         {
           std::cout << "DEBUG SystematicsCalculator::build_universes() Point 27" << std::endl;

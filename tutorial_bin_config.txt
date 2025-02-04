@@ -1,14 +1,15 @@
 tutorial_1D_proton
 phaseIITriggerTree
+6
+0 1 "trueCC && trueFSLPdg == 13 && trueTrackLengthInMRD > 0. && trueFV && true_no_mesons && trueCosTheta > 0.8 && trueMuonMomentum >= 600 && trueMuonMomentum < 740"
+0 1 "trueCC && trueFSLPdg == 13 && trueTrackLengthInMRD > 0. && trueFV && true_no_mesons && trueCosTheta > 0.8 && trueMuonMomentum >= 740 && trueMuonMomentum < 860"
+0 1 "trueCC && trueFSLPdg == 13 && trueTrackLengthInMRD > 0. && trueFV && true_no_mesons && trueCosTheta > 0.8 && trueMuonMomentum >= 860 && trueMuonMomentum < 1000"
+0 1 "trueCC && trueFSLPdg == 13 && trueTrackLengthInMRD > 0. && trueFV && true_no_mesons && trueCosTheta > 0.8 && trueMuonMomentum >= 1000 && trueMuonMomentum < 1100"
+0 1 "trueCC && trueFSLPdg == 13 && trueTrackLengthInMRD > 0. && trueFV && true_no_mesons && trueCosTheta > 0.8 && trueMuonMomentum >= 1100 && trueMuonMomentum < 1200"
+1 -1 "trueCC != 1 || trueFSLPdg != 13 || trueTrackLengthInMRD <= 0. || !trueFV || !true_no_mesons || trueCosTheta <= 0.8 || trueMuonMomentum < 600 || trueMuonMomentum >= 1200"
 5
-0 1 "trueCC && trueMuonEnergy >= 600 && trueMuonEnergy < 810"
-0 1 "trueCC && trueMuonEnergy >= 810 && trueMuonEnergy < 910"
-0 1 "trueCC && trueMuonEnergy >= 910 && trueMuonEnergy < 1005"
-0 1 "trueCC && trueMuonEnergy >= 1005 && trueMuonEnergy < 1100"
-0 1 "trueCC && trueMuonEnergy >= 1100 && trueMuonEnergy < 1200"
-5
-0 1 "trueCC && trueMuonEnergy >= 600 && trueMuonEnergy < 810"
-0 1 "trueCC && trueMuonEnergy >= 810 && trueMuonEnergy < 910"
-0 1 "trueCC && trueMuonEnergy >= 910 && trueMuonEnergy < 1005"
-0 1 "trueCC && trueMuonEnergy >= 1005 && trueMuonEnergy < 1100"
-0 1 "trueCC && trueMuonEnergy >= 1100 && trueMuonEnergy < 1200"
+0 1 "simpleRecoFlag==1 && reco_contained_in_MRD && recoFV && RCSRPred > 0.2 && simpleRecoCosTheta > 0.8 && simpleRecoMomentumCor >= 600 && simpleRecoMomentumCor < 740"
+0 1 "simpleRecoFlag==1 && reco_contained_in_MRD && recoFV && RCSRPred > 0.2 && simpleRecoCosTheta > 0.8 && simpleRecoMomentumCor >= 740 && simpleRecoMomentumCor < 860"
+0 1 "simpleRecoFlag==1 && reco_contained_in_MRD && recoFV && RCSRPred > 0.2 && simpleRecoCosTheta > 0.8 && simpleRecoMomentumCor >= 860 && simpleRecoMomentumCor < 1000"
+0 1 "simpleRecoFlag==1 && reco_contained_in_MRD && recoFV && RCSRPred > 0.2 && simpleRecoCosTheta > 0.8 && simpleRecoMomentumCor >= 1000 && simpleRecoMomentumCor < 1100"
+0 1 "simpleRecoFlag==1 && reco_contained_in_MRD && recoFV && RCSRPred > 0.2 && simpleRecoCosTheta > 0.8 && simpleRecoMomentumCor >= 1100 && simpleRecoMomentumCor < 1200"
