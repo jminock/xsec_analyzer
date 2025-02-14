@@ -90,11 +90,6 @@ void apply_cv_correction_weights( const std::string& wgt_name,
     wgt *= 1.;
   }
   else if ( wgt_name == "weight_flux_all"
-    || string_has_end(wgt_name, "_FluxUnisim")
-    || string_has_end(wgt_name, "_PrimaryHadronNormalization")
-    || string_has_end(wgt_name, "_PrimaryHadronFeynmanScaling")
-    || string_has_end(wgt_name, "_PrimaryHadronSanfordWang")
-    || string_has_end(wgt_name, "_PrimaryHadronSWCentralSplineVariation")
     || wgt_name == "weight_reint_all"
     || wgt_name == "weight_xsr_scc_Fa3_SCC"
     || wgt_name == "weight_xsr_scc_Fv3_SCC" )
@@ -584,6 +579,7 @@ void UniverseMaker::build_universes(
     return;
   }
 
+  // Weight starts here
   WeightHandler wh;
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 2"<<std::endl;
   wh.set_branch_addresses( input_chain_, universe_branch_names );
@@ -597,6 +593,7 @@ void UniverseMaker::build_universes(
 
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 
+  // This is fine and doesn't relate to weights
   this->prepare_formulas();
 
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
@@ -612,7 +609,7 @@ void UniverseMaker::build_universes(
   input_chain_.GetEntry( 0 );
 
   // Now prepare the vectors of Universe objects with the correct sizes
-  this->prepare_universes( wh );
+  this->prepare_universes( wh ); //Uses weights
 
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 6"<<std::endl;
 

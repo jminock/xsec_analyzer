@@ -115,10 +115,10 @@ const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
   { "flux_piontotxsec", {"weight_piontotxsec_FluxUnisim_", 1000u, false, true, true} },
 
   { "flux_piplus", {"weight_piplus_PrimaryHadronSWCentralSplineVariation_", 1000u, false, true, true} },
-
+*/
   { "flux", {"weight_flux_all_", 1000u, false, true, true} },
 
-  { "reint", {"weight_reint_all_", 1000u, false, true, false} },
+//  { "reint", {"weight_reint_all_", 1000u, false, true, false} },
 
   { "xsec_multi", {"weight_All_UBGenie_", 500u, false, true, false} },
 
@@ -149,7 +149,7 @@ const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
 
   { "xsec_XSecShape_CCMEC", {"weight_XSecShape_CCMEC_UBGenie_", 2u,
     false, false, false} },
-
+/*
   { "xsec_xsr_scc_Fa3_SCC", {"weight_xsr_scc_Fa3_SCC_", 10u,
     false, true, false} },
 
