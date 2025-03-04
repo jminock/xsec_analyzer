@@ -274,7 +274,7 @@ void stvPrep(){
 		mcct = std::cos(mcangle*M_PI/180.);
 		recop  = std::sqrt(simpleenergy*simpleenergy - muon_m*muon_m);
 		recopc = std::sqrt(simpleenergy*simpleenergy - muon_m*muon_m)*1.25 - 137.;
-		mc_no_mesons = hasVisNonMuon;
+		mc_no_mesons = !(hasVisNonMuon);
 		recoMRD = numMRDTracks == 1 ? MRDStop->at(0) : false;
 
 		//check all the weights have the same number of universes

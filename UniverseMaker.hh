@@ -58,6 +58,9 @@ const std::string TUNE_WEIGHT_NAME = "weight_TunedCentralValue_UBGenie";
 // Special weight name to store the unweighted event counts
 const std::string UNWEIGHTED_NAME = "unweighted";
 
+// Special weight name to store the unweighted DV event counts
+const std::string DV_UNWEIGHTED_NAME = "dv_unweighted";
+
 constexpr double MIN_WEIGHT = 0.;
 constexpr double MAX_WEIGHT = 30.;
 
@@ -359,6 +362,7 @@ class UniverseMaker {
     // weights. If it is omitted, all available ones will be auto-detected and
     // used.
     void build_universes(
+      std::string ntuple_type = "",
       const std::vector<std::string>* universe_branch_names = nullptr );
 
     // Overloaded version of the function that takes a reference the
@@ -366,6 +370,7 @@ class UniverseMaker {
     // is the same as the original, but in this case the explicit vector of
     // branch names definitely exists.
     void build_universes(
+      std::string ntuple_type,
       const std::vector<std::string>& universe_branch_names );
 
     // Writes the response matrix histograms to an output ROOT file
@@ -396,7 +401,7 @@ class UniverseMaker {
 
     // Prepares the TTreeFormula objects needed to test each entry for
     // membership in each bin
-    void prepare_formulas();
+    void prepare_formulas(std::string ntuple_type);
 
     // Prepares the Universe objects needed to store summed event weights for
     // each bin in each systematic variation universe
@@ -502,7 +507,7 @@ void UniverseMaker::add_input_file( const std::string& input_file_name )
   std::cout << "DEBUG UniverseMaker::add_input_file - Point 4"<<std::endl;
 }
 
-void UniverseMaker::prepare_formulas() {
+void UniverseMaker::prepare_formulas(std::string ntuple_type) {
 
   // Remove any pre-existing TTreeFormula objects from the owned vectors
   true_bin_formulas_.clear();
@@ -533,16 +538,18 @@ void UniverseMaker::prepare_formulas() {
   // std::cout<<"DEBUG prepare_formulas true_bin_formulas_.size(): "<<true_bin_formulas_.size()<<std::endl;
 
   // Create one TTreeFormula for each reco bin definition
-  for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
-    const auto& bin_def = reco_bins_.at( rb );
-    std::string formula_name = "reco_formula_" + std::to_string( rb );
+  if(ntuple_type != "detVarShiftE"){
+    for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
+      const auto& bin_def = reco_bins_.at( rb );
+      std::string formula_name = "reco_formula_" + std::to_string( rb );
 
-    auto rbf = std::make_unique< TTreeFormula >( formula_name.c_str(),
-      bin_def.selection_cuts_.c_str(), &input_chain_ );
+      auto rbf = std::make_unique< TTreeFormula >( formula_name.c_str(),
+        bin_def.selection_cuts_.c_str(), &input_chain_ );
 
-    rbf->SetQuickLoad( true );
+      rbf->SetQuickLoad( true );
 
-    reco_bin_formulas_.emplace_back( std::move(rbf) );
+      reco_bin_formulas_.emplace_back( std::move(rbf) );
+    }
   }
 
   // Create one TTreeFormula for each true EventCategory
@@ -567,12 +574,14 @@ void UniverseMaker::prepare_formulas() {
 }
 
 void UniverseMaker::build_universes(
+  std::string ntuple_type,
   const std::vector<std::string>& universe_branch_names )
 {
-  return this->build_universes( &universe_branch_names );
+  return this->build_universes( ntuple_type, &universe_branch_names );
 }
 
 void UniverseMaker::build_universes(
+  std::string ntuple_type,
   const std::vector<std::string>* universe_branch_names )
 {
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 0"<<std::endl;
@@ -598,8 +607,7 @@ void UniverseMaker::build_universes(
 
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 
-  // This is fine and doesn't relate to weights
-  this->prepare_formulas();
+  this->prepare_formulas(ntuple_type);
 
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
   // with MC events, then we shouldn't do anything with the true bin counts.
@@ -620,6 +628,7 @@ void UniverseMaker::build_universes(
 
   int treenumber = 0;
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
+//  for ( long long entry = 0; entry < 10; ++entry ) {
     if(entry%1000==0) std::cout<<"\rUniverseMaker::build_universes "<<entry<<" of "<<input_chain_.GetEntries()<<std::flush;
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
@@ -637,14 +646,49 @@ void UniverseMaker::build_universes(
 
     // Find the reco bin(s) that should be filled for the current event
     std::vector< FormulaMatch > matched_reco_bins;
-    for ( size_t rb = 0u; rb < reco_bin_formulas_.size(); ++rb ) {
-      auto& rbf = reco_bin_formulas_.at( rb );
-      int num_formula_elements = rbf->GetNdata();
-      for ( int el = 0; el < num_formula_elements; ++el ) {
-        double formula_wgt = rbf->EvalInstance( el );
-        if ( formula_wgt ){
-          matched_reco_bins.emplace_back( rb, formula_wgt );
-          // std::cout<<" rb: "<<rb;
+    if(ntuple_type == "detVarShiftE"){
+
+      // Remove any pre-existing TTreeFormula objects from the owned vectors
+      reco_bin_formulas_.clear();
+
+      // Create one TTreeFormula for each reco bin definition
+      for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
+        const auto& bin_def = reco_bins_.at( rb );
+        std::string formula_name = "reco_formula_" + std::to_string( rb );
+        //Edit simpleRecoMomentumCor here!!!
+        std::string selection_cuts = bin_def.selection_cuts_;
+        std::string formula_var = "simpleRecoMomentumCor";
+        int pos1 = selection_cuts.find(formula_var);
+        selection_cuts.replace(pos1, formula_var.length(), "simpleRecoMomentumCor");//+20.
+        int pos2 = selection_cuts.rfind(formula_var);
+        selection_cuts.replace(pos2, formula_var.length(), "simpleRecoMomentumCor");//+20.
+
+        auto rbf = std::make_unique< TTreeFormula >( formula_name.c_str(),
+          selection_cuts.c_str(), &input_chain_ );
+
+        rbf->SetQuickLoad( true );
+       
+        //Adjust selection cuts here for DVShiftE
+        int num_formula_elements = rbf->GetNdata();
+        for ( int el = 0; el < num_formula_elements; ++el ) {
+          double formula_wgt = rbf->EvalInstance( el );
+          if ( formula_wgt ){
+            matched_reco_bins.emplace_back( rb, formula_wgt );
+            // std::cout<<" rb: "<<rb;
+          }
+        }
+      }
+    }
+    else{
+      for ( size_t rb = 0u; rb < reco_bin_formulas_.size(); ++rb ) {
+        auto& rbf = reco_bin_formulas_.at( rb );
+        int num_formula_elements = rbf->GetNdata();
+        for ( int el = 0; el < num_formula_elements; ++el ) {
+          double formula_wgt = rbf->EvalInstance( el );
+          if ( formula_wgt ){
+            matched_reco_bins.emplace_back( rb, formula_wgt );
+            // std::cout<<" rb: "<<rb;
+          }
         }
       }
     }
@@ -696,7 +740,7 @@ void UniverseMaker::build_universes(
       // std::cout<<std::endl; // todo remove
       // if(matched_true_bins.empty()) throw std::runtime_error( "No true bins matched - Should at least be in background bins" );
 
-      // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 11"<<std::endl;
+      //  std::cout<<"DEBUG UniverseMaker::build_universes - Point 11"<<std::endl;
 
       // If we have event weights in the map at all, then get the current
       // event's CV correction weights here for potentially frequent re-use
@@ -708,7 +752,7 @@ void UniverseMaker::build_universes(
       }
     } // MC event
 
-    // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 12"<<std::endl;
+    //  std::cout<<"DEBUG UniverseMaker::build_universes - Point 12"<<std::endl;
 
     for ( const auto& pair : wh.weight_map() ) {
       const std::string& wgt_name = pair.first;
@@ -717,7 +761,7 @@ void UniverseMaker::build_universes(
 
       auto& u_vec = universes_.at( wgt_name );
 
-      // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 13"<<std::endl;
+        //std::cout<<"DEBUG UniverseMaker::build_universes - Point 13"<<std::endl;
 
       for ( size_t u = 0u; u < wgt_vec->size(); ++u ) {
 
@@ -745,7 +789,7 @@ void UniverseMaker::build_universes(
           } // reco bins
         } // true bins
 
-        // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 14"<<std::endl;
+          //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14"<<std::endl;
 
         for ( const auto& rb : matched_reco_bins ) {
           universe.hist_reco_->Fill( rb.bin_index_, rb.weight_ * safe_wgt );
@@ -753,7 +797,7 @@ void UniverseMaker::build_universes(
           for ( const auto& c : matched_category_indices ) {
             universe.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
               c.weight_ * rb.weight_ * safe_wgt );
-            // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<" safe_wgt: "<<safe_wgt<<std::endl;
+              //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<" safe_wgt: "<<safe_wgt<<std::endl;
           }
 
           for ( const auto& other_rb : matched_reco_bins ) {
@@ -802,7 +846,7 @@ void UniverseMaker::build_universes(
   } // TChain entries
 
   input_chain_.ResetBranchAddresses();
-  // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 18"<<std::endl;
+  //  std::cout<<"DEBUG UniverseMaker::build_universes - Point 18"<<std::endl;
 }
 
 void UniverseMaker::prepare_universes( const WeightHandler& wh ) {

@@ -108,16 +108,18 @@ int main( int argc, char* argv[] ) {
 
     bool has_event_weights = is_reweightable_mc_ntuple( input_file_name );
 
+    std::string ntuple_type = fpm.ntuple_type_to_string(fpm.get_ntuple_file_type(input_file_name));
+
     if ( has_event_weights ) {
       // If the check above was successful, then run all of the histogram
       // calculations in the usual way
-      univ_maker.build_universes();
+      univ_maker.build_universes(ntuple_type);
     }
     else {
       // Passing in the fake list of explicit branch names below instructs
       // the UniverseMaker class to ignore all event weights while
       // processing the current ntuple
-      univ_maker.build_universes( { "FAKE_BRANCH_NAME" } );
+      univ_maker.build_universes( ntuple_type,{ "FAKE_BRANCH_NAME" } );
     }
 
     univ_maker.save_histograms( output_file_name, input_file_name );

@@ -858,7 +858,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
           if ( temp_pot == 0 ) throw std::runtime_error( "Missing POT in MC file!" );
 //          file_pot = temp_pot->GetVal();
           file_pot = temp_pot;
-          file_pot = 1.5297e+20; //ACTUALLY FIX THIS SO IT'S NOT 3.2545e16
+          file_pot = 1.508e+19; //ACTUALLY FIX THIS SO IT'S NOT 3.2545e16
         }
         else
         {
@@ -1066,7 +1066,9 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
         else if (is_detVar || is_altCV)
         {
           std::cout << "DEBUG SystematicsCalculator::build_universes() Point 29" << std::endl;
+
           std::string dv_univ_name = fpm.ntuple_type_to_string(type);
+          std::cout << "DV univ name: " << dv_univ_name << std::endl;
 
           // Make a temporary new Universe object to store
           // (POT-scaled) detVar/altCV histograms (if needed)
@@ -1229,13 +1231,13 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
                 std::cout<<"DEBUG univ_name: "<< univ_name << " in file: " << file_name <<std::endl;
                 //std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 3 rw_universes_.at(univ_name).index_: "<<rw_universes_.at(univ_name).back()->index_<<std::endl;
               }
-              std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 3.1"<<std::endl;
+//              std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 3.1"<<std::endl;
               // Move this universe into the map. Note that the automatic
               // sorting of keys in a ROOT TDirectoryFile ensures that the
               // universe ordering remains correct.
               rw_universes_.at(univ_name).emplace_back(
                   std::move(temp_univ));
-              std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 4"<<std::endl;
+//              std::cout<<"DEBUG SystematicsCalculator rw_universes_ Point 4"<<std::endl;
 
             } // TDirectoryFile keys
 
@@ -1260,11 +1262,11 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
 //QQQQQ
             for (size_t u_idx = 0u; u_idx < univ_vec.size(); ++u_idx)
             {
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.2 u_idx: " << u_idx << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.2 u_idx: " << u_idx << std::endl;
               // Get a reference to the current universe object
               auto &universe = *univ_vec.at(u_idx);
 
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.2.1 universe.index_: " << universe.index_ << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.2.1 universe.index_: " << universe.index_ << std::endl;
 
               // Double-check that the universe ordering is right. The
               // index in the map of universes should match the index
@@ -1280,12 +1282,12 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
               // current TDirectoryFile
               std::string hist_name_prefix = univ_name + '_' + std::to_string(u_idx);
 
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3 hist_name_prefix: " << hist_name_prefix << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3 hist_name_prefix: " << hist_name_prefix << std::endl;
 
               auto h_reco = get_object_unique_ptr<TH1D>(
                   (hist_name_prefix + "_reco"), *subdir);
 
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.1" << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.1" << std::endl;
 
               auto h_true = get_object_unique_ptr<TH1D>(
                   (hist_name_prefix + "_true"), *subdir);
@@ -1293,7 +1295,7 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
               auto h_2d = get_object_unique_ptr<TH2D>(
                   (hist_name_prefix + "_2d"), *subdir);
 
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.2" << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.2" << std::endl;
 
               auto h_categ = get_object_unique_ptr<TH2D>(
                   (hist_name_prefix + "_categ"), *subdir);
@@ -1301,18 +1303,18 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
               auto h_reco2d = get_object_unique_ptr<TH2D>(
                   (hist_name_prefix + "_reco2d"), *subdir);
 
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.3 - rw_scale_factor: " << rw_scale_factor << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.3 - rw_scale_factor: " << rw_scale_factor << std::endl;
 
               // Scale these histograms to the appropriate BNB data POT for
               // the current run
               h_reco->Scale(rw_scale_factor);
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.3.1" << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.3.1" << std::endl;
               h_true->Scale(rw_scale_factor);
               h_2d->Scale(rw_scale_factor);
               h_categ->Scale(rw_scale_factor);
               h_reco2d->Scale(rw_scale_factor);
 
-              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.4" << std::endl;
+//              std::cout << "DEBUG SystematicsCalculator::build_universes() Point 37.3.4" << std::endl;
 
               // Add their contributions to the owned histograms for the
               // current Universe object
@@ -1323,10 +1325,10 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
               universe.hist_reco2d_->Add(h_reco2d.get());
 
 
-              std::cout<<"DEBUG SystematicsCalculator::build_universes() Point 37.4"<<std::endl;
+//              std::cout<<"DEBUG SystematicsCalculator::build_universes() Point 37.4"<<std::endl;
 
             } // universes indices
-            std::cout<<"DEBUG SystematicsCalculator::build_universes() Point 37.5"<<std::endl;
+//            std::cout<<"DEBUG SystematicsCalculator::build_universes() Point 37.5"<<std::endl;
 
           } // universe types
           std::cout << "DEBUG SystematicsCalculator::build_universes() Point 38" << std::endl;
@@ -1718,7 +1720,7 @@ std::unique_ptr<CovMatrixMap> SystematicsCalculator::get_covariances() const
       std::string ntuple_type_str;
       config_file >> ntuple_type_str;
 
-      // std::cout << "\rDEBUG get_covariances - Y 12 ntupletype: " << ntuple_type_str << std::endl;
+      std::cout << "\rDEBUG get_covariances - Y 12 ntupletype: " << ntuple_type_str << std::endl;
 
       const auto &fpm = FilePropertiesManager::Instance();
       auto ntuple_type = fpm.string_to_ntuple_type(ntuple_type_str);
@@ -1730,14 +1732,14 @@ std::unique_ptr<CovMatrixMap> SystematicsCalculator::get_covariances() const
         throw std::runtime_error("Invalid NtupleFileType!");
       }
 
-      // std::cout << "\rDEBUG get_covariances - Y 12" << std::flush;
+      std::cout << "\rDEBUG get_covariances - Y 12" << std::flush;
 
       // Use a bare pointer for the CV universe so that we can reassign it
       // below if needed. References can't be reassigned after they are
       // initialized.
       const auto *detVar_cv_u = detvar_universes_.at(NFT::kDetVarMCCV).get();
       const auto &detVar_alt_u = detvar_universes_.at(ntuple_type);
-      // std::cout << "\rDEBUG get_covariances - Y 13" << std::flush;
+      std::cout << "\rDEBUG get_covariances - Y 13" << std::flush;
 
       // The Recomb2 and SCE variations use an alternate "extra CV" universe
       // since they were generated with smaller MC statistics.

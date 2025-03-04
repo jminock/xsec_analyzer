@@ -33,7 +33,7 @@ struct DirNamecycle {
 };
 
 // Detector systematic variations are currently only available for Run 3
-constexpr int DETVAR_RUN = 3;
+constexpr int DETVAR_RUN = 1;
 
 // Namecycle to use when prepraring universe specifiers for the
 // detector variation samples (including the detVar CV)
@@ -489,10 +489,11 @@ void covMat( const std::string& input_respmat_file_name,
   // Note that a wireMod dE/dx sample is available, but we exclude it because it
   // is deprecated in favor of Recomb2. Using both together would be
   // double-counting.
-  constexpr std::array< NtupleFileType, 9 > detVar_labels = {
+  constexpr std::array< NtupleFileType, 10 > detVar_labels = {
     NFT::kDetVarMCLYatten, NFT::kDetVarMCLYdown, NFT::kDetVarMCLYrayl,
     NFT::kDetVarMCRecomb2, NFT::kDetVarMCSCE, NFT::kDetVarMCWMAngleXZ,
-    NFT::kDetVarMCWMAngleYZ, NFT::kDetVarMCWMX, NFT::kDetVarMCWMYZ
+    NFT::kDetVarMCWMAngleYZ, NFT::kDetVarMCWMX, NFT::kDetVarMCWMYZ,
+    NFT::kDetVarMCShiftE
   };
 
   std::vector< DirNamecycle > detvar_universes;

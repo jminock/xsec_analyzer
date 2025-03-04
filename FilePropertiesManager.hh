@@ -40,6 +40,7 @@ enum class NtupleFileType {
   kDetVarMCWMX, // wireMod X
   kDetVarMCWMYZ, // wireMod YZ
   kDetVarMCCVExtra, // alternate CV for small samples
+  kDetVarMCShiftE, // ANNIE generalized DV calibration
 
   // An alternate CV MC simulation
   kAltCVMC,
@@ -50,13 +51,14 @@ enum class NtupleFileType {
 
 // Utility functions for manipulating NtupleFileType values
 bool ntuple_type_is_detVar( const NtupleFileType& type ) {
-  constexpr std::array< NtupleFileType, 12 > detVar_types = {
+  constexpr std::array< NtupleFileType, 13 > detVar_types = {
     NtupleFileType::kDetVarMCCV, NtupleFileType::kDetVarMCLYatten,
     NtupleFileType::kDetVarMCLYdown, NtupleFileType::kDetVarMCLYrayl,
     NtupleFileType::kDetVarMCRecomb2, NtupleFileType::kDetVarMCSCE,
     NtupleFileType::kDetVarMCWMAngleXZ, NtupleFileType::kDetVarMCWMAngleYZ,
     NtupleFileType::kDetVarMCWMdEdx, NtupleFileType::kDetVarMCWMX,
-    NtupleFileType::kDetVarMCWMYZ, NtupleFileType::kDetVarMCCVExtra
+    NtupleFileType::kDetVarMCWMYZ, NtupleFileType::kDetVarMCCVExtra,
+    NtupleFileType::kDetVarMCShiftE
   };
 
   const auto begin = detVar_types.cbegin();
@@ -297,6 +299,7 @@ class FilePropertiesManager {
       { "detVarWMX", NtupleFileType::kDetVarMCWMX },
       { "detVarWMYZ", NtupleFileType::kDetVarMCWMYZ },
       { "detVarCVExtra", NtupleFileType::kDetVarMCCVExtra },
+      { "detVarShiftE", NtupleFileType::kDetVarMCShiftE },
       { "altCVMC", NtupleFileType::kAltCVMC },
     };
 
