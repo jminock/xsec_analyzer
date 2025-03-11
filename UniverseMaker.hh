@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <random>
+#include <time.h>
 
 // ROOT includes
 #include "TChain.h"
@@ -362,7 +364,7 @@ class UniverseMaker {
     // weights. If it is omitted, all available ones will be auto-detected and
     // used.
     void build_universes(
-      std::string ntuple_type = "",
+      bool isDVShiftE = false,
       const std::vector<std::string>* universe_branch_names = nullptr );
 
     // Overloaded version of the function that takes a reference the
@@ -370,7 +372,7 @@ class UniverseMaker {
     // is the same as the original, but in this case the explicit vector of
     // branch names definitely exists.
     void build_universes(
-      std::string ntuple_type,
+      bool isDVShiftE,
       const std::vector<std::string>& universe_branch_names );
 
     // Writes the response matrix histograms to an output ROOT file
@@ -401,11 +403,15 @@ class UniverseMaker {
 
     // Prepares the TTreeFormula objects needed to test each entry for
     // membership in each bin
-    void prepare_formulas(std::string ntuple_type);
+    void prepare_formulas(bool isDVShiftE);
 
     // Prepares the Universe objects needed to store summed event weights for
     // each bin in each systematic variation universe
-    void prepare_universes( const WeightHandler& wh );
+    void prepare_universes( bool isDVShiftE, const int nDVuniverses, const WeightHandler& wh );
+
+    // Returns updated selection cuts based off model distribution
+    // Intended for ANNIE DV. Only smears reco observable
+    void apply_DV_model(std::string& selection_cuts);
 
     // Bin definitions in true space
     std::vector< TrueBin > true_bins_;
@@ -489,6 +495,7 @@ void UniverseMaker::add_input_file( const std::string& input_file_name )
   // Check to make sure that the input file contains the expected ntuple
   TFile temp_file( input_file_name.c_str(), "read" );
 
+  std::cout << input_file_name << std::endl;
   // Temporary storage
   TTree* temp_tree;
 
@@ -507,7 +514,7 @@ void UniverseMaker::add_input_file( const std::string& input_file_name )
   std::cout << "DEBUG UniverseMaker::add_input_file - Point 4"<<std::endl;
 }
 
-void UniverseMaker::prepare_formulas(std::string ntuple_type) {
+void UniverseMaker::prepare_formulas(bool isDVShiftE) {
 
   // Remove any pre-existing TTreeFormula objects from the owned vectors
   true_bin_formulas_.clear();
@@ -538,7 +545,7 @@ void UniverseMaker::prepare_formulas(std::string ntuple_type) {
   // std::cout<<"DEBUG prepare_formulas true_bin_formulas_.size(): "<<true_bin_formulas_.size()<<std::endl;
 
   // Create one TTreeFormula for each reco bin definition
-  if(ntuple_type != "detVarShiftE"){
+  if(!isDVShiftE){
     for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
       const auto& bin_def = reco_bins_.at( rb );
       std::string formula_name = "reco_formula_" + std::to_string( rb );
@@ -573,15 +580,30 @@ void UniverseMaker::prepare_formulas(std::string ntuple_type) {
 
 }
 
-void UniverseMaker::build_universes(
-  std::string ntuple_type,
-  const std::vector<std::string>& universe_branch_names )
-{
-  return this->build_universes( ntuple_type, &universe_branch_names );
+void UniverseMaker::apply_DV_model(std::string& selection_cuts){
+  std::string formula_var = "simpleRecoMomentumCor";
+  //Model
+  
+  double scale = 1.;
+  double constant = 0.;
+  //updated observable
+  std::string scaled_var = std::to_string(scale) + "*" + formula_var + "+" + std::to_string(constant);
+  //find and replace observable
+  int pos1 = selection_cuts.find(formula_var);
+  selection_cuts.replace(pos1, formula_var.length(), scaled_var);
+  int pos2 = selection_cuts.rfind(formula_var);
+  selection_cuts.replace(pos2, formula_var.length(), scaled_var);
 }
 
 void UniverseMaker::build_universes(
-  std::string ntuple_type,
+  bool isDVShiftE,
+  const std::vector<std::string>& universe_branch_names )
+{
+  return this->build_universes( isDVShiftE, &universe_branch_names );
+}
+
+void UniverseMaker::build_universes(
+  bool isDVShiftE,
   const std::vector<std::string>* universe_branch_names )
 {
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 0"<<std::endl;
@@ -605,9 +627,12 @@ void UniverseMaker::build_universes(
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
+  //number of DV universes
+  const int nDVuniverses = 100;
+
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 
-  this->prepare_formulas(ntuple_type);
+  this->prepare_formulas(isDVShiftE);
 
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
   // with MC events, then we shouldn't do anything with the true bin counts.
@@ -622,13 +647,12 @@ void UniverseMaker::build_universes(
   input_chain_.GetEntry( 0 );
 
   // Now prepare the vectors of Universe objects with the correct sizes
-  this->prepare_universes( wh ); //Uses weights
+  this->prepare_universes( isDVShiftE, nDVuniverses, wh );
 
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 6"<<std::endl;
 
   int treenumber = 0;
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
-//  for ( long long entry = 0; entry < 10; ++entry ) {
     if(entry%1000==0) std::cout<<"\rUniverseMaker::build_universes "<<entry<<" of "<<input_chain_.GetEntries()<<std::flush;
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
@@ -646,40 +670,7 @@ void UniverseMaker::build_universes(
 
     // Find the reco bin(s) that should be filled for the current event
     std::vector< FormulaMatch > matched_reco_bins;
-    if(ntuple_type == "detVarShiftE"){
-
-      // Remove any pre-existing TTreeFormula objects from the owned vectors
-      reco_bin_formulas_.clear();
-
-      // Create one TTreeFormula for each reco bin definition
-      for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
-        const auto& bin_def = reco_bins_.at( rb );
-        std::string formula_name = "reco_formula_" + std::to_string( rb );
-        //Edit simpleRecoMomentumCor here!!!
-        std::string selection_cuts = bin_def.selection_cuts_;
-        std::string formula_var = "simpleRecoMomentumCor";
-        int pos1 = selection_cuts.find(formula_var);
-        selection_cuts.replace(pos1, formula_var.length(), "simpleRecoMomentumCor");//+20.
-        int pos2 = selection_cuts.rfind(formula_var);
-        selection_cuts.replace(pos2, formula_var.length(), "simpleRecoMomentumCor");//+20.
-
-        auto rbf = std::make_unique< TTreeFormula >( formula_name.c_str(),
-          selection_cuts.c_str(), &input_chain_ );
-
-        rbf->SetQuickLoad( true );
-       
-        //Adjust selection cuts here for DVShiftE
-        int num_formula_elements = rbf->GetNdata();
-        for ( int el = 0; el < num_formula_elements; ++el ) {
-          double formula_wgt = rbf->EvalInstance( el );
-          if ( formula_wgt ){
-            matched_reco_bins.emplace_back( rb, formula_wgt );
-            // std::cout<<" rb: "<<rb;
-          }
-        }
-      }
-    }
-    else{
+    if(!isDVShiftE){
       for ( size_t rb = 0u; rb < reco_bin_formulas_.size(); ++rb ) {
         auto& rbf = reco_bin_formulas_.at( rb );
         int num_formula_elements = rbf->GetNdata();
@@ -717,7 +708,6 @@ void UniverseMaker::build_universes(
     std::vector< FormulaMatch > matched_true_bins;
     double spline_weight = 0.;
     double tune_weight = 0.;
-//  double tune_weight = 0.;
 
     // std::cout<<"DEBUG UniverseMaker::build_universes - Point 10"<<std::endl;
 
@@ -815,32 +805,99 @@ void UniverseMaker::build_universes(
     // weighted ones. Note that "unweighted" in this context applies to
     // the universe event weights, but that any implicit weights from
     // the TTreeFormula evaluations will still be applied.
-    auto& univ = universes_.at( UNWEIGHTED_NAME ).front();
+    auto& u_vec = universes_.at( UNWEIGHTED_NAME );
     //std::cout<<"DEBUG UNWEIGHTED_NAME: "<<UNWEIGHTED_NAME<<std::endl;
-    for ( const auto& tb : matched_true_bins ) {
-      univ.hist_true_->Fill( tb.bin_index_, tb.weight_ );
+    if(isDVShiftE){
+      std::string formula_var = "simpleRecoMomentumCor";
+      int pos = 0;
+      std::vector< TTreeFormula* > vrbf;
+      // Create one TTreeFormula for each reco bin definition
+      for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
+        const auto& bin_def = reco_bins_.at( rb );
+        std::string formula_name = "reco_formula_" + std::to_string( rb );
+
+        // Edit simpleRecoMomentumCor here
+        std::string selection_cuts = bin_def.selection_cuts_;
+        // updated observable
+        std::string gaus = "1.5*sin(pi*rndm)*sqrt(-2*log(rndm))";
+        std::string scaled_var = formula_var + "+" + gaus;
+        // find and replace observable
+        pos = selection_cuts.find(formula_var);
+        selection_cuts.replace(pos, formula_var.length(), scaled_var);
+        pos = selection_cuts.rfind(formula_var);
+        selection_cuts.replace(pos, formula_var.length(), scaled_var);
+
+        TTreeFormula* rbf = new TTreeFormula( formula_name.c_str(),
+          selection_cuts.c_str(), &input_chain_ );
+
+        vrbf.emplace_back(rbf);
+      }
+      for (int i = 0; i < nDVuniverses; ++i){
+        // Remove any pre-existing TTreeFormula objects from the owned vectors
+        reco_bin_formulas_.clear();
+
+        for( size_t rb = 0u; rb < reco_bins_.size(); ++rb ){
+          auto rbf = vrbf.at( rb );
+          rbf->SetQuickLoad( true );
+          double formula_wgt = rbf->EvalInstance( 0 );
+          if ( formula_wgt ) matched_reco_bins.emplace_back( rb, formula_wgt );
+        }
+
+        auto& univ = u_vec.at(i);
+
+        for ( const auto& tb : matched_true_bins ) {
+          univ.hist_true_->Fill( tb.bin_index_, tb.weight_ );
+          for ( const auto& rb : matched_reco_bins ) {
+            univ.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
+              tb.weight_ * rb.weight_ );
+          } // reco bins
+        } // true bins
+
+        for ( const auto& rb : matched_reco_bins ) {
+
+          univ.hist_reco_->Fill( rb.bin_index_, rb.weight_ );
+
+          for ( const auto& c : matched_category_indices ) {
+            univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
+              c.weight_ * rb.weight_ );
+              //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
+          }
+
+          for ( const auto& other_rb : matched_reco_bins ) {
+            univ.hist_reco2d_->Fill( rb.bin_index_, other_rb.bin_index_,
+              rb.weight_ * other_rb.weight_ );
+          }
+
+        } // reco bins
+      } // multiple unweighted universes
+    } else {
+      auto& univ = u_vec.front();
+      for ( const auto& tb : matched_true_bins ) {
+        univ.hist_true_->Fill( tb.bin_index_, tb.weight_ );
+        for ( const auto& rb : matched_reco_bins ) {
+          univ.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
+            tb.weight_ * rb.weight_ );
+        } // reco bins
+      } // true bins
+
       for ( const auto& rb : matched_reco_bins ) {
-        univ.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
-          tb.weight_ * rb.weight_ );
+
+        univ.hist_reco_->Fill( rb.bin_index_, rb.weight_ );
+
+        for ( const auto& c : matched_category_indices ) {
+          univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
+            c.weight_ * rb.weight_ );
+            //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
+        }
+
+        for ( const auto& other_rb : matched_reco_bins ) {
+          univ.hist_reco2d_->Fill( rb.bin_index_, other_rb.bin_index_,
+            rb.weight_ * other_rb.weight_ );
+        }
+
       } // reco bins
-    } // true bins
-
-    for ( const auto& rb : matched_reco_bins ) {
-
-      univ.hist_reco_->Fill( rb.bin_index_, rb.weight_ );
-
-      for ( const auto& c : matched_category_indices ) {
-        univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
-          c.weight_ * rb.weight_ );
-          //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
-      }
-
-      for ( const auto& other_rb : matched_reco_bins ) {
-        univ.hist_reco2d_->Fill( rb.bin_index_, other_rb.bin_index_,
-          rb.weight_ * other_rb.weight_ );
-      }
-
-    } // reco bins
+ 
+    } //single unweighted universe
     // // std::cout<<"DEBUG UniverseMaker::build_universes - Point 17"<<std::endl;
 
   } // TChain entries
@@ -849,7 +906,7 @@ void UniverseMaker::build_universes(
   //  std::cout<<"DEBUG UniverseMaker::build_universes - Point 18"<<std::endl;
 }
 
-void UniverseMaker::prepare_universes( const WeightHandler& wh ) {
+void UniverseMaker::prepare_universes( bool isDVShiftE, const int nDVuniverses, const WeightHandler& wh ) {
 
   size_t num_true_bins = true_bins_.size();
   size_t num_reco_bins = reco_bins_.size();
@@ -869,7 +926,13 @@ void UniverseMaker::prepare_universes( const WeightHandler& wh ) {
 
   // Add the special "unweighted" universe unconditionally
   std::vector< Universe > temp_uvec;
-  temp_uvec.emplace_back( UNWEIGHTED_NAME, 0, num_true_bins, num_reco_bins );
+  if(isDVShiftE){
+    for(int i = 0; i < nDVuniverses; i++){
+      temp_uvec.emplace_back( UNWEIGHTED_NAME, i, num_true_bins, num_reco_bins );
+    }
+  } else {
+    temp_uvec.emplace_back( UNWEIGHTED_NAME, 0, num_true_bins, num_reco_bins );
+  }
   universes_[ UNWEIGHTED_NAME ] = std::move( temp_uvec );
 
 }

@@ -9,6 +9,7 @@
 #include "TFile.h"
 #include "TROOT.h"
 #include "TTree.h"
+#include "TRandom.h"
 
 // STV analysis includes
 #include "FilePropertiesManager.hh"
@@ -42,6 +43,10 @@ int main( int argc, char* argv[] ) {
       << " [FILE_PROPERTIES_CONFIG_FILE]\n";
     return 1;
   }
+
+  // Set random seed used later in UniverseMaker::build_universes()
+  // for DV smearing
+  gRandom->SetSeed(1337);
 
   std::string list_file_name( argv[1] );
   std::string univmake_config_file_name( argv[2] );
@@ -109,17 +114,18 @@ int main( int argc, char* argv[] ) {
     bool has_event_weights = is_reweightable_mc_ntuple( input_file_name );
 
     std::string ntuple_type = fpm.ntuple_type_to_string(fpm.get_ntuple_file_type(input_file_name));
+    bool isDVShiftE = (ntuple_type == "detVarShiftE");
 
     if ( has_event_weights ) {
       // If the check above was successful, then run all of the histogram
       // calculations in the usual way
-      univ_maker.build_universes(ntuple_type);
+      univ_maker.build_universes(isDVShiftE);
     }
     else {
       // Passing in the fake list of explicit branch names below instructs
       // the UniverseMaker class to ignore all event weights while
       // processing the current ntuple
-      univ_maker.build_universes( ntuple_type,{ "FAKE_BRANCH_NAME" } );
+      univ_maker.build_universes( isDVShiftE,{ "FAKE_BRANCH_NAME" } );
     }
 
     univ_maker.save_histograms( output_file_name, input_file_name );

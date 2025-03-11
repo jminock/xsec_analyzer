@@ -29,7 +29,7 @@ chi_square_cc0pi_christian: chi_square_cc0pi_christian.cpp
 	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -O3 -o $@ $^ includes/*.o
 
 univmake: univmake.C
-	 $(CXX) $(shell root-config --cflags --libs) -O3 -o $@ $^
+	 $(CXX) -g $(shell root-config --cflags --libs) -O3 -o $@ $^
 	
 .PHONY: clean
 
