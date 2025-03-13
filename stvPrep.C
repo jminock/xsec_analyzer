@@ -29,7 +29,7 @@ bool FidVol(double x, double y, double z){
 
 void stvPrep(){
         //Open file and trees
-        TFile *f = new TFile("/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_40k_ntuple.root","update");
+        TFile *f = new TFile("/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_400k_ntuple.root","update");
         gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
 //      gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDict.so");
         gInterpreter->GenerateDictionary("map<string,vector<double>>", "map;string;vector");

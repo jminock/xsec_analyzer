@@ -17,7 +17,7 @@
 //Used for non numuMC files that do not need weights
 void stripWeights(){
         //Open file and trees
-        TFile *f = new TFile("PhaseIITree_40k_ntuple.root","read");
+        TFile *f = new TFile("/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_400k_ntuple.root","read");
         gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
 //      gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDict.so");
         gInterpreter->GenerateDictionary("map<string,vector<double>>", "map;string;vector");
@@ -55,7 +55,7 @@ void stripWeights(){
 	T->SetBranchStatus("weight_kplus_PrimaryHadronFeynmanScaling", 0);
 	T->SetBranchStatus("weight_kzero_PrimaryHadronSanfordWang", 0);
 
-        TFile *fnew = new TFile("PhaseIITree_40k_DVCV_ntuple.root","recreate");
+        TFile *fnew = new TFile("PhaseIITree_40k_BNB_ntuple.root","recreate");
 	auto Tnew = T->CloneTree();
 
 	fnew->Write();
