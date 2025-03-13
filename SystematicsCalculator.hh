@@ -992,7 +992,6 @@ void SystematicsCalculator::build_universes(TDirectoryFile &root_tdir)
         auto temp_2d_hist = get_object_unique_ptr<TH2D>(
             "unweighted_0_2d", *subdir);
 
-	if(temp_2d_hist == NULL) std::cout << "AAAAA" << std::endl;
         // NOTE: the convention of the UniverseMaker class is to use
         // x as the true axis and y as the reco axis.
         int num_true_bins = temp_2d_hist->GetXaxis()->GetNbins();

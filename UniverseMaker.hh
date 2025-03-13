@@ -409,10 +409,6 @@ class UniverseMaker {
     // each bin in each systematic variation universe
     void prepare_universes( bool isDVShiftE, const int nDVuniverses, const WeightHandler& wh );
 
-    // Returns updated selection cuts based off model distribution
-    // Intended for ANNIE DV. Only smears reco observable
-    void apply_DV_model(std::string& selection_cuts);
-
     // Bin definitions in true space
     std::vector< TrueBin > true_bins_;
 
@@ -580,21 +576,6 @@ void UniverseMaker::prepare_formulas(bool isDVShiftE) {
 
 }
 
-void UniverseMaker::apply_DV_model(std::string& selection_cuts){
-  std::string formula_var = "simpleRecoMomentumCor";
-  //Model
-  
-  double scale = 1.;
-  double constant = 0.;
-  //updated observable
-  std::string scaled_var = std::to_string(scale) + "*" + formula_var + "+" + std::to_string(constant);
-  //find and replace observable
-  int pos1 = selection_cuts.find(formula_var);
-  selection_cuts.replace(pos1, formula_var.length(), scaled_var);
-  int pos2 = selection_cuts.rfind(formula_var);
-  selection_cuts.replace(pos2, formula_var.length(), scaled_var);
-}
-
 void UniverseMaker::build_universes(
   bool isDVShiftE,
   const std::vector<std::string>& universe_branch_names )
@@ -628,7 +609,7 @@ void UniverseMaker::build_universes(
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
   //number of DV universes
-  const int nDVuniverses = 100;
+  const int nDVuniverses = 500;
 
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 

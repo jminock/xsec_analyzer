@@ -13,6 +13,8 @@
 #include <iostream>
 #include <cmath>
 
+//Script that strips all weights (except TunedCentralValue) out of ANNIE MC files
+//Used for non numuMC files that do not need weights
 void stripWeights(){
         //Open file and trees
         TFile *f = new TFile("PhaseIITree_40k_ntuple.root","read");
