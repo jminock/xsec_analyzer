@@ -553,6 +553,32 @@ void UniverseMaker::prepare_formulas(bool isDVShiftE) {
 
       reco_bin_formulas_.emplace_back( std::move(rbf) );
     }
+  } else {
+    std::string formula_var = "simpleRecoMomentumCor";
+    int pos = 0;
+    for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
+      const auto& bin_def = reco_bins_.at( rb );
+      std::string formula_name = "reco_formula_" + std::to_string( rb );
+
+      // Edit simpleRecoMomentumCor here
+      std::string selection_cuts = bin_def.selection_cuts_;
+      // updated observable
+      std::string gaus = "1.5*sin(pi*rndm)*sqrt(-2*log(rndm))";
+      std::string scaled_var = formula_var + "+" + gaus;
+
+      // find and replace observable
+      pos = selection_cuts.find(formula_var);
+      selection_cuts.replace(pos, formula_var.length(), scaled_var);
+      pos = selection_cuts.rfind(formula_var);
+      selection_cuts.replace(pos, formula_var.length(), scaled_var);
+
+      auto rbf = std::make_unique< TTreeFormula >( formula_name.c_str(),
+          selection_cuts.c_str(), &input_chain_ );
+
+      rbf->SetQuickLoad( true );
+ 
+      reco_bin_formulas_.emplace_back( std::move(rbf) );
+    }
   }
 
   // Create one TTreeFormula for each true EventCategory
@@ -609,7 +635,7 @@ void UniverseMaker::build_universes(
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
   //number of DV universes
-  const int nDVuniverses = 500;
+  const int nDVuniverses = 100;
 
   std::cout<<"DEBUG UniverseMaker::build_universes - Point 4"<<std::endl;
 
@@ -789,37 +815,9 @@ void UniverseMaker::build_universes(
     auto& u_vec = universes_.at( UNWEIGHTED_NAME );
     //std::cout<<"DEBUG UNWEIGHTED_NAME: "<<UNWEIGHTED_NAME<<std::endl;
     if(isDVShiftE){
-      std::string formula_var = "simpleRecoMomentumCor";
-      int pos = 0;
-      std::vector< TTreeFormula* > vrbf;
-      // Create one TTreeFormula for each reco bin definition
-      for ( size_t rb = 0u; rb < reco_bins_.size(); ++rb ) {
-        const auto& bin_def = reco_bins_.at( rb );
-        std::string formula_name = "reco_formula_" + std::to_string( rb );
-
-        // Edit simpleRecoMomentumCor here
-        std::string selection_cuts = bin_def.selection_cuts_;
-        // updated observable
-        std::string gaus = "1.5*sin(pi*rndm)*sqrt(-2*log(rndm))";
-        std::string scaled_var = formula_var + "+" + gaus;
-        // find and replace observable
-        pos = selection_cuts.find(formula_var);
-        selection_cuts.replace(pos, formula_var.length(), scaled_var);
-        pos = selection_cuts.rfind(formula_var);
-        selection_cuts.replace(pos, formula_var.length(), scaled_var);
-
-        TTreeFormula* rbf = new TTreeFormula( formula_name.c_str(),
-          selection_cuts.c_str(), &input_chain_ );
-
-        vrbf.emplace_back(rbf);
-      }
       for (int i = 0; i < nDVuniverses; ++i){
-        // Remove any pre-existing TTreeFormula objects from the owned vectors
-        reco_bin_formulas_.clear();
-
         for( size_t rb = 0u; rb < reco_bins_.size(); ++rb ){
-          auto rbf = vrbf.at( rb );
-          rbf->SetQuickLoad( true );
+          auto& rbf = reco_bin_formulas_.at( rb );
           double formula_wgt = rbf->EvalInstance( 0 );
           if ( formula_wgt ) matched_reco_bins.emplace_back( rb, formula_wgt );
         }

@@ -60,7 +60,7 @@ In place of detector systematics, ANNIE uses a generalized model based on throug
 
 -MC files - File name, ~# of events, ~POT, been through stvPrep?
 /pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_ntuple.root  40000  1.508e19  Y
-/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_400k_ntuple.root 384680 1.5297e20 Y
+/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_400k_ntuple.root 384575 1.5297e20 Y
 /pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_BNB_ntuple.root  40000  1.508e19  Y
 /pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_DVCV_ntuple.root  40000  1.508e19  Y
 /pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_DV_ntuple.root  40000  1.508e19  Y
