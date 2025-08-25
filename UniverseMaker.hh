@@ -16,7 +16,6 @@
 #include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
-#include "TRandom.h"
 #include "Math/GSLRndmEngines.h"
 #include "TString.h"
 #include "TTreeFormula.h"
@@ -64,7 +63,6 @@ const std::string TUNE_WEIGHT_NAME = "weight_TunedCentralValue_UBGenie";
 const std::string UNWEIGHTED_NAME = "unweighted";
 
 // DV shifts
-const std::string DV_WEIGHT_NAME = "DVShiftE";
 const int DV_N_UNIVERSES = 100;
 const int DV_RANDOM_SEED = 42;
 
@@ -802,12 +800,6 @@ void UniverseMaker::build_universes(
     else {  // DVShiftE
       std::vector<std::vector<FormulaMatch> > matched_reco_bins(DV_N_UNIVERSES);
 
-      auto& u_vec_uw = universes_.at( UNWEIGHTED_NAME );
-      auto& univ_uw = u_vec_uw.front();
-
-      double safe_wgt = safe_weight(tune_weight);
-      auto& u_vec = universes_.at( DV_WEIGHT_NAME );
-
       for( size_t rb = 0; rb < reco_bins_.size(); rb++ ) {
         auto& rbf = reco_bin_formulas_.at( rb );
         assert(rbf->GetNdata() == DV_N_UNIVERSES);
@@ -818,38 +810,29 @@ void UniverseMaker::build_universes(
       }
 
       // Fill histograms
+      auto& u_vec_uw = universes_.at( UNWEIGHTED_NAME );
+
       for (size_t i=0; i<DV_N_UNIVERSES; i++) {
-        auto& univ = u_vec.at(i);
+        auto& univ_uw = u_vec_uw.at(i);
 
         for ( const auto& tb : matched_true_bins ) {
-          univ.hist_true_->Fill( tb.bin_index_, tb.weight_ * safe_wgt );
           univ_uw.hist_true_->Fill( tb.bin_index_, tb.weight_ );
 
           for ( const auto& rb : matched_reco_bins[i] ) {
-            univ.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
-              tb.weight_ * rb.weight_ * safe_wgt );
-
             univ_uw.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
               tb.weight_ * rb.weight_ );
           }
         }
 
         for ( const auto& rb : matched_reco_bins[i] ) {
-          univ.hist_reco_->Fill( rb.bin_index_, rb.weight_ * safe_wgt );
           univ_uw.hist_reco_->Fill( rb.bin_index_, rb.weight_ );
 
           for ( const auto& c : matched_category_indices ) {
-            univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
-              c.weight_ * rb.weight_ * safe_wgt );
-
             univ_uw.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
               c.weight_ * rb.weight_ );
           }
 
           for ( const auto& other_rb : matched_reco_bins[i] ) {
-            univ.hist_reco2d_->Fill( rb.bin_index_, other_rb.bin_index_,
-              rb.weight_ * other_rb.weight_ * safe_wgt );
-
             univ_uw.hist_reco2d_->Fill( rb.bin_index_, other_rb.bin_index_,
               rb.weight_ * other_rb.weight_ );
           }
@@ -882,17 +865,18 @@ void UniverseMaker::prepare_universes( bool isDVShiftE, const WeightHandler& wh 
 
   // Add the special "unweighted" universe unconditionally
   std::vector< Universe > temp_uvec;
-  temp_uvec.emplace_back( UNWEIGHTED_NAME, 0, num_true_bins, num_reco_bins );
-  universes_[ UNWEIGHTED_NAME ] = std::move( temp_uvec );
 
   // DV shift universes
   if (isDVShiftE) {
-    std::vector< Universe > u_vec;
     for (size_t u=0; u<DV_N_UNIVERSES; u++) {
-      u_vec.emplace_back(DV_WEIGHT_NAME, u, num_true_bins, num_reco_bins );
+      temp_uvec.emplace_back(UNWEIGHTED_NAME, u, num_true_bins, num_reco_bins );
     }
-    universes_[DV_WEIGHT_NAME] = std::move( u_vec );
   }
+  else {
+    temp_uvec.emplace_back( UNWEIGHTED_NAME, 0, num_true_bins, num_reco_bins );
+  }
+
+  universes_[ UNWEIGHTED_NAME ] = std::move( temp_uvec );
 }
 
 void UniverseMaker::save_histograms(
