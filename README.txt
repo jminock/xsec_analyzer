@@ -57,17 +57,34 @@ In place of detector systematics, ANNIE uses a generalized model based on throug
 ---------------------------
 -BG file - (just a regular ntuple with only a single event, will need an actaul BG file in future)
 /exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_bg2_ntuple.root
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_bg_ntuple.root
 
 -MC files - File name, ~# of events, ~POT, been through stvPrep?
-/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_ntuple.root  40000  1.508e19  Y
-/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_400k_ntuple.root 384575 1.5297e20 Y
-/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_BNB_ntuple.root  40000  1.508e19  Y
-/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_DVCV_ntuple.root  40000  1.508e19  Y
-/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_DV_ntuple.root  40000  1.508e19  Y
-
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_40k_stv_ntuple.root    40000  1.508e19 Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_stv_ntuple.root   390000 1.493e20 Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_1mil_stv_ntuple_1.root 966999 3.706e20 Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_1mil_stv_ntuple_2.root 961997 3.694e20 Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_1mil_stv_ntuple_3.root 954998 3.649e20 Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_1mil_stv_ntuple_4.root 959996 3.676e20 Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_BNB_ntuple.root  390000 1.493e20  Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_DVCV_ntuple.root 390000 1.493e20  Y
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_DV_ntuple.root   390000 1.493e20  Y
 
 -fake data - Ntuples with only CV weight (use until we get real data working)
-/pnfs/annie/persistent/users/jminock/fake-data/* ~500000 ~1.914e20 N
+/pnfs/annie/persistent/users/jminock/fake-data-nuwro/stv_ntuples/ 39742  1.453e19 Y
+/pnfs/annie/persistent/users/jminock/fake-data-nuwro/stv_ntuples/ 397478 1.431e20 Y
+/pnfs/annie/persistent/users/jminock/fake-data-nuwro/stv_ntuples/ 992843 3.618e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_cv.root       444865 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_ccqel-up.root 474530 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_ccqel-dn.root 412453 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_ccres-up.root 465738 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_ccres-dn.root 420431 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_ccmec-up.root 449936 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_ccmec-dn.root 437033 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_flux-up.root  514323 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_flux-dn.root  373855 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_pmu-up.root   444577 1.7e20 Y
+/exp/annie/data/users/mastbaum/cc0pi/fake_data/fake_data_pmu-dn.root   442997 1.7e20 Y
 
 -stv output - Currently ran with corresponding MC as both MC and fake beam data - OUTDATED
 /pnfs/annie/persistent/users/jminock/stv-output/stv-40k-output.root

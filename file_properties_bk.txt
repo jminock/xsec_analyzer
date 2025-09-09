@@ -16,17 +16,8 @@
 #
 # Full beam-on data
 #/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_large_unweighted_ntuple.root 1 onBNB 1895996 1.463e21
+#/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_400k_BNB_ntuple.root 1 onBNB 384575 1.5297e20
 /pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_BNB_ntuple.root 1 onBNB 390000 1.49293e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_ccmec-dn.root 1 onBNB 437033 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_ccmec-up.root 1 onBNB 449936 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_ccqel-dn.root 1 onBNB 412453 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_ccqel-up.root 1 onBNB 474530 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_ccres-dn.root 1 onBNB 420431 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_ccres-up.root 1 onBNB 465738 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_flux-dn.root 1 onBNB 373855 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_flux-up.root 1 onBNB 514323 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_pmu-dn.root 1 onBNB 442997 1.7e20
-#/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/fake-data-genie/fake_data_pmu-up.root 1 onBNB 444577 1.7e20
 #/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_20k_ntuple.root 3 onBNB 20000 1.56e19
 #/uboone/data/users/gardiner/ntuples-stv/stv-run1_neutrinoselection_filt_numu_ALL.root 1 onBNB 36139233 1.62e20
 #/uboone/data/users/gardiner/ntuples-stv/stv-run2_neutrinoselection_filt_numu_ALL.root 2 onBNB 62045760 2.62e20
@@ -50,7 +41,7 @@
 #
 # numu MC samples
 #/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_large_unweighted_ntuple.root 1 numuMC
-/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_stv_ntuple.root 1 numuMC
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_1mil_stv_ntuple_1.root 1 numuMC
 #/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_1mil_stv_ntuple_2.root 1 numuMC
 #/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_20k_ntuple.root 3 numuMC
 #/uboone/data/users/gardiner/ntuples-stv/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root 1 numuMC

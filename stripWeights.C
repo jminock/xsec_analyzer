@@ -17,7 +17,7 @@
 //Used for non numuMC files that do not need weights
 void stripWeights(){
         //Open file and trees
-        TFile *f = new TFile("/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_400k_ntuple.root","read");
+        TFile *f = new TFile("/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_stv_ntuple.root","read");
         gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
 //      gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDict.so");
         gInterpreter->GenerateDictionary("map<string,vector<double>>", "map;string;vector");
@@ -33,7 +33,7 @@ void stripWeights(){
 	T->SetBranchStatus("weight_AxFFCCQEshape_UBGenie", 0);
 	T->SetBranchStatus("weight_DecayAngMEC_UBGenie", 0);
 	T->SetBranchStatus("weight_NormCCCOH_UBGenie", 0);
-	T->SetBranchStatus("weight_Norm_NCCOH_UBGenie", 0);
+	T->SetBranchStatus("weight_NormNCCOH_UBGenie", 0);
 	T->SetBranchStatus("weight_RPA_CCQE_UBGenie", 0);
 	T->SetBranchStatus("weight_RootinoFix_UBGenie", 0);
 	T->SetBranchStatus("weight_ThetaDelta2NRad_UBGenie", 0);
@@ -55,7 +55,7 @@ void stripWeights(){
 	T->SetBranchStatus("weight_kplus_PrimaryHadronFeynmanScaling", 0);
 	T->SetBranchStatus("weight_kzero_PrimaryHadronSanfordWang", 0);
 
-        TFile *fnew = new TFile("PhaseIITree_40k_BNB_ntuple.root","recreate");
+        TFile *fnew = new TFile("PhaseIITree_bg_ntuple.root","recreate");
 	auto Tnew = T->CloneTree();
 
 	fnew->Write();
