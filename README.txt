@@ -34,8 +34,7 @@ To use:
 ***DVShiftE***
 --------------
 In place of detector systematics, ANNIE uses a generalized model based on through-going muons and michel electrons to smear reco observables to match the uncertainty of the detector.
--Treat as any other detVar systematic in configuration files, use tag 'detVarShiftE'
--UniverseMaker.hh line 612 sets number of universes, currently set to 500.
+-Find way to use multiple universes???
 -UniverseMaker.hh lines 803-804 assign model and apply to reco observable.
 -Official model does not yet exist, currently being worked on by Luis Mora-Lepin. Temporary model is gaussian function with mean of 0 and sigma of 1.5 added to observable.
 
