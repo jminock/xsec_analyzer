@@ -5,7 +5,8 @@ ROOTFLAGS = `root-config --cflags --glibs --libs` -lTreePlayer -lEG -lMinuit -lM
 
 # make a binary for every .cxx file
 # all : $(patsubst %.cpp, %.o, $(wildcard *.cpp)) chi_square_cc0pi_christian univmake
- all : chi_square_cc0pi_christian univmake
+all : chi_square_cc0pi_christian univmake
+# all : chi_square_cc0pi_data univmake
 # cc0pi_analyzer_org
 # cc0pi_analyzer
 # # rule for each one
@@ -28,6 +29,12 @@ stv_root_dict.o:
 chi_square_cc0pi_christian: chi_square_cc0pi_christian.cpp
 	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -O3 -o $@ $^ includes/*.o
 
+chi_square_cc0pi_frac: chi_square_cc0pi_frac.cpp
+	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -O3 -o $@ $^ includes/*.o
+
+chi_square_cc0pi_data: chi_square_cc0pi_data.cpp
+	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -O3 -o $@ $^ includes/*.o
+
 univmake: univmake.C
 	 $(CXX) -g $(ROOTFLAGS) -O3 -o $@ $^
 	
@@ -36,5 +43,5 @@ univmake: univmake.C
 .INTERMEDIATE: stv_root_dict.o
 
 clean:
-	rm -f $(wildcard *.o) $(patsubst %.cpp, %, $(wildcard *.cpp)) chi_square_cc0pi_christian univmake
+	rm -f $(wildcard *.o) $(patsubst %.cpp, %, $(wildcard *.cpp)) chi_square_cc0pi_christian chi_square_cc0pi_frac chi_square_cc0pi_data univmake
 

@@ -34,7 +34,6 @@
 #include <cassert>
 #include <set>
 #include <vector>
-#include <TFile.h>
 #include <TH1D.h>
 #include <THStack.h>
 #include <TLegend.h>
@@ -53,8 +52,8 @@
 #include <iomanip>
 #include "TMatrixD.h"
 //#include "MatrixUtils.hh"
-//#include "SliceBinning.hh"
-//#include "SliceHistogram.hh"
+#include "SliceBinning.hh"
+#include "SliceHistogram.hh"
 #include "TLatex.h"
 //#include "HistUtils.hh"
 #include "RooStats/RooStatsUtils.h"
@@ -64,6 +63,7 @@
 
 #include "includes/PlotUtils.hh"
 #include "includes/AnnieGeometryTools.hh"
+
 
 void chi_square_all_gens(std::string infiles);
 void multiply_1d_hist_by_matrix(TMatrixD *mat, TH1 *hist);
@@ -120,16 +120,16 @@ void Test_plot() {
     char text_title_pdf3[2024];
     char text_title_pdf4[2024];
     char RootName[1024];
-  sprintf(text_title_pdf1, "Make_Plots_Annie_unimake_0pi_noDV.pdf(","" );
+  sprintf(text_title_pdf1, "Make_Plots_Annie_unimake_2percent_0pi.pdf(","" );
 
-  sprintf(text_title_pdf2, "Make_Plots_Annie_unimake_0pi_noDV.pdf","" );
-  sprintf(text_title_pdf3, "Make_Plots_Annie_unimake_0pi_noDV.pdf)","" );
-  sprintf(text_title_pdf4, "Make_Plots_Annie_unimake_0pi_noDV","" );
+  sprintf(text_title_pdf2, "Make_Plots_Annie_unimake_2percent_0pi.pdf","" );
+  sprintf(text_title_pdf3, "Make_Plots_Annie_unimake_2percent_0pi.pdf)","" );
+  sprintf(text_title_pdf4, "Make_Plots_Annie_unimake_2percent_0pi","" );
 
 std::string text_title_pdf2_string(text_title_pdf2);
 
     auto& fpm = FilePropertiesManager::Instance();
-    fpm.load_file_properties( "file_properties_closure.txt" );
+    fpm.load_file_properties( "file_properties_2percent.txt" );
    TCanvas* c4 = new TCanvas("c4");
    c4-> Print(text_title_pdf1);
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
@@ -138,20 +138,19 @@ std::string text_title_pdf2_string(text_title_pdf2);
      std::vector<double> nbins = {600.,740.,860.,960.,1080.,1200};
 //     std::vector<double> nbins = {500.,680.,770.,860.,950.,1040.,1160.,1400.};
 
-
    
    
    
   //ANNIE
   auto* mcc9 = new MCC9SystematicsCalculator(
   //    "/exp/annie/data/users/jminock/stv-analysis/stv-univmake-output-20k-pmu.root",
-    "output.root",
+    "output_0pi_2percent.root",
     "systcalc_data.conf" );
 
   const auto &syst = *mcc9;
 
   TH1D* genie_cv_truth_vals = new TH1D("genie_cv_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
-  TH1D* fake_data_truth_vals = new TH1D("fake_data_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
+//  TH1D* fake_data_truth_vals = new TH1D("fake_data_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* unfolded_events_vals = new TH1D("unfolded_events_vals", ";p_{#mu}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* fake_data_reco_vals = new TH1D("fake_data_reco_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
 
@@ -200,7 +199,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
    text_title_pdf2_string);
    
 
-  //syst.data_hists_.at( NFT::kOnBNB ).get()->Add(syst.data_hists_.at( NFT::kExtBNB ).get(),-1);
+  syst.data_hists_.at( NFT::kOnBNB ).get()->Add(syst.data_hists_.at( NFT::kExtBNB ).get(),-1);
 
 
 
@@ -222,17 +221,17 @@ std::string text_title_pdf2_string(text_title_pdf2);
    
    std::cout<<" Total POT ="<< total_pot << std::endl;
   
-  const auto& fake_data_univ = mcc9->fake_data_universe();
-  TH1D* fake_data_truth = fake_data_univ->hist_true_.get(); 
-  TH1D* fake_data_reco = fake_data_univ->hist_reco_.get(); 
+//  const auto& fake_data_univ = mcc9->fake_data_universe();
+//  TH1D* fake_data_truth = fake_data_univ->hist_true_.get(); 
+//  TH1D* fake_data_reco = fake_data_univ->hist_reco_.get(); 
 
   Draw_STACK_HIST(
    reco_bnb_hist,
   "reco_bnb_hist",
    reco_ext_hist,
    "reco_ext_hist",
-   fake_data_reco,
-   "fake_data_reco",
+   genie_cv_truth,
+   "genie_cv_truth",
    "",
    "E_{#mu} ",
    "Events",
@@ -275,7 +274,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   
-    std::unique_ptr< Unfolder > unfolder (new WienerSVDUnfolder( true, WienerSVDUnfolder::RegularizationMatrixType::kSecondDeriv ) );
+    std::unique_ptr< Unfolder > unfolder (new WienerSVDUnfolder( true, WienerSVDUnfolder::RegularizationMatrixType::kFirstDeriv ) );
 //    std::unique_ptr< Unfolder > unfolder (new DAgostiniUnfolder( DAgostiniUnfolder::ConvergenceCriterion::FigureOfMerit, 0.025 ) );
 
     auto result = unfolder->unfold( *mcc9 );
@@ -321,8 +320,6 @@ std::string text_title_pdf2_string(text_title_pdf2);
       unfolded_events_vals->SetBinError( t + 1, error/conv_factor/(nbins[t+1] - nbins[t]) );
       std::cout<<"ERROR: "<<std::pow(error/conv_factor/(nbins[t+1] - nbins[t]),2)<<std::endl;        
  
-      //std::cout<<"unfolded signal events: "<<evts/*<<" pre-scaled error: "<<error*/<<std::endl;
-      //std::cout<<"Scale: "<<conv_factor/(nbins[t+1] - nbins[t])<<" SCALED events: "<<evts/conv_factor/(nbins[t+1] - nbins[t])<<" Scaled error:  "<<error/conv_factor/(nbins[t+1] - nbins[t])<<"\n"<<std::endl;
 
     }
   }
@@ -334,7 +331,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
   const TMatrixD& true_covmat = *true_covmat_ptr; 
   //TH2D* ac_matrix_bins = new TH2D(true_covmat);
   
-  TH2D* ac_matrix_hist = new TH2D("ac_matrix_hist", "A_{C} Matrix; p^{true}_{#mu}; p^{true}_{#mu}", nbins.size() - 1, nbins.data(), nbins.size() - 1, nbins.data());
+  TH2D* ac_matrix_hist = new TH2D("ac_matrix_hist", "; p^{true}_{#mu}; p^{true}_{#mu}", nbins.size() - 1, nbins.data(), nbins.size() - 1, nbins.data());
   for ( int iter_row = 0; iter_row < nbins.size() - 1; ++iter_row ) {
       for ( int iter_col = 0; iter_col < nbins.size() - 1; ++iter_col ) {
 //          ac_matrix_hist->SetBinContent(iter_row + 1, iter_col + 1, ac_matrix_bins->GetBinContent(iter_row + 1, iter_col + 1)/conv_factor/conv_factor/(nbins[ iter_row + 1 ] -  nbins[iter_row])/(nbins[iter_col + 1] -  nbins[iter_col]) );
@@ -373,10 +370,10 @@ std::string text_title_pdf2_string(text_title_pdf2);
 
 
   multiply_1d_hist_by_matrix(A_C, genie_cv_truth);
-  multiply_1d_hist_by_matrix(A_C, fake_data_truth);
+//  multiply_1d_hist_by_matrix(A_C, fake_data_truth);
 
   for ( int t = 0; t < nbins.size() - 1; ++t ) { 
-      fake_data_truth_vals->SetBinContent( t + 1, fake_data_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
+//      fake_data_truth_vals->SetBinContent( t + 1, fake_data_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
       genie_cv_truth_vals->SetBinContent( t + 1, genie_cv_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
   }
 
@@ -418,20 +415,20 @@ std::string text_title_pdf2_string(text_title_pdf2);
   //leg->AddEntry(genie_cv_truth_vals, TString::Format("p = %g || #sigma = %g",  p_value, sigma), "");
 
   double chi_square_fake = 0;
-  for (int k=0; k<inv_cov_mat->GetNrows(); k++) {
-       for (int j=0; j<inv_cov_mat->GetNcols(); j++) {
-           chi_square_fake += (unfolded_events_vals->GetBinContent(k+1) - fake_data_truth_vals->GetBinContent(k+1))*(inv_cov_mat->operator()(k,j))*(unfolded_events_vals->GetBinContent(j+1) - fake_data_truth_vals->GetBinContent(j+1));
-        }
-   }
+//  for (int k=0; k<inv_cov_mat->GetNrows(); k++) {
+//       for (int j=0; j<inv_cov_mat->GetNcols(); j++) {
+//           chi_square_fake += (unfolded_events_vals->GetBinContent(k+1) - fake_data_truth_vals->GetBinContent(k+1))*(inv_cov_mat->operator()(k,j))*(unfolded_events_vals->GetBinContent(j+1) - fake_data_truth_vals->GetBinContent(j+1));
+//        }
+//   }
 
 //  leg->AddEntry(fake_data_truth_vals,"Truth (NuWro)","l");
-  leg->AddEntry(fake_data_truth_vals,"Truth (Fake Data)","l");
+//  leg->AddEntry(fake_data_truth_vals,"Truth (Fake Data)","l");
   p_value = TMath::Prob(chi_square_fake, dof);
   sigma = RooStats::PValueToSignificance(p_value);
   std::cout<<"chi_square is: "<<chi_square_fake<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
-  leg->AddEntry(fake_data_truth_vals, TString::Format("#chi^{2} / d.o.f = %.2f / %g ", chi_square_fake, dof), "");
+//  leg->AddEntry(fake_data_truth_vals, TString::Format("#chi^{2} / d.o.f = %.2f / %g ", chi_square_fake, dof), "");
   //leg->AddEntry(fake_data_truth_vals, TString::Format("p = %g || #sigma = %g", p_value, sigma), "");
-  leg->AddEntry(fake_data_truth_vals, TString::Format("p = %.2f", p_value), "");
+//  leg->AddEntry(fake_data_truth_vals, TString::Format("p = %.2f", p_value), "");
 
   unfolded_events_vals->SetStats(0);
   unfolded_events_vals->SetLineWidth(3);
@@ -470,17 +467,17 @@ std::string text_title_pdf2_string(text_title_pdf2);
     //leg->AddEntry(h_lower, "Lower Bound", "l");
   
   //unfolded_events_vals->Draw("e");
-  fake_data_truth_vals->SetLineColor( kBlue );
-  fake_data_truth_vals->SetLineWidth( 3 );
-  fake_data_truth_vals->SetLineStyle( 2 );
-  fake_data_truth_vals->Draw( "hist same" ); //DRAW
+//  fake_data_truth_vals->SetLineColor( kBlue );
+//  fake_data_truth_vals->SetLineWidth( 3 );
+//  fake_data_truth_vals->SetLineStyle( 2 );
+//  fake_data_truth_vals->Draw( "hist same" ); //DRAW
   genie_cv_truth_vals->SetLineColor( kMagenta - 3 );
   genie_cv_truth_vals->SetLineWidth( 3 );
   genie_cv_truth_vals->SetLineStyle( 2 );
   genie_cv_truth_vals->Draw( "hist same" ); //DRAW
   
 //  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
-  leg->AddEntry(unfolded_events_vals,"Unfolded Fake BNB data","l");
+  leg->AddEntry(unfolded_events_vals,"Unfolded BNB data","l");
 leg->Draw();
   c2->SetLeftMargin(0.2);
   c2->SaveAs(text_title_pdf2);  
@@ -488,8 +485,8 @@ leg->Draw();
 
 
   Draw_HIST(
-   fake_data_truth_vals,
-  "fake_data_truth_vals",
+   genie_cv_truth_vals,
+  "genie_cv_truth_vals",
    unfolded_events_vals,
    "unfolded_events_vals",
    "",
@@ -501,10 +498,151 @@ leg->Draw();
    -99,
    c2,
    text_title_pdf2 );
-   
-   
-   
-   
+/////////////////////////////////////   
+
+
+  #ifdef USE_FAKE_DATA
+    // Add the EXT to the "data" when working with fake data
+    reco_bnb_hist->Add( reco_ext_hist );
+  #endif
+
+  TH2D* category_hist = syst.cv_universe().hist_categ_.get();
+
+  // Total MC+EXT prediction in reco bin space. Start by getting EXT.
+  TH1D* reco_mc_plus_ext_hist = dynamic_cast< TH1D* >(
+    reco_ext_hist->Clone("reco_mc_plus_ext_hist") );
+  reco_mc_plus_ext_hist->SetDirectory( nullptr );
+
+  // Add in the CV MC prediction
+  reco_mc_plus_ext_hist->Add( syst.cv_universe().hist_reco_.get() );
+
+  // Keys are covariance matrix types, values are CovMatrix objects that
+  // represent the corresponding matrices
+  auto* matrix_map_ptr = syst.get_covariances().release();
+  auto& matrix_map = *matrix_map_ptr;
+
+  auto* sb_ptr = new SliceBinning( "tutorial_slice_config.txt" );
+  auto& sb = *sb_ptr;
+
+  for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
+
+    const auto& slice = sb.slices_.at( sl_idx );
+
+    // We now have all of the reco bin space histograms that we need as input.
+    // Use them to make new histograms in slice space.
+
+    SliceHistogram* slice_mc_plus_ext = SliceHistogram::make_slice_histogram(
+      *reco_mc_plus_ext_hist, slice, &matrix_map.at("total") );
+
+    TCanvas* c1000 = new TCanvas;
+    slice_mc_plus_ext->hist_->SetLineWidth( 3 );
+    slice_mc_plus_ext->hist_->Draw( "same hist e" );
+
+
+    // Get the binning and axis labels for the current slice by cloning the
+    // (empty) histogram owned by the Slice object
+    TH1* slice_hist = dynamic_cast< TH1* >(
+      slice.hist_->Clone("slice_hist") );
+
+    slice_hist->SetDirectory( nullptr );
+
+    // Keys are labels, values are fractional uncertainty histograms
+    auto* fr_unc_hists = new std::map< std::string, TH1* >();
+    auto& frac_uncertainty_hists = *fr_unc_hists;
+
+    // Show fractional uncertainties computed using these covariance matrices
+    // in the ROOT plot. All configured fractional uncertainties will be
+    // included in the output pgfplots file regardless of whether they appear
+    // in this vector.
+    const std::vector< std::string > cov_mat_keys = { "total","flux","xsec_total","MCstats","detVar_total","BNBstats" };
+ 
+/*    const std::vector< std::string > cov_mat_keys = { "total",
+      "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
+      "MCstats", "EXTstats", "BNBstats"
+    };
+*/
+    // Loop over the various systematic uncertainties
+    int color = 1;
+    for ( const auto& pair : matrix_map ) {
+
+      const auto& key = pair.first;
+      const auto& cov_matrix = pair.second;
+
+      SliceHistogram* slice_for_syst = SliceHistogram::make_slice_histogram(
+        *reco_mc_plus_ext_hist, slice, &cov_matrix );
+
+      // The SliceHistogram object already set the bin errors appropriately
+      // based on the slice covariance matrix. Just change the bin contents
+      // for the current histogram to be fractional uncertainties. Also set
+      // the "uncertainties on the uncertainties" to zero.
+      // TODO: revisit this last bit, possibly assign bin errors here
+      for ( const auto& bin_pair : slice.bin_map_ ) {
+        int global_bin_idx = bin_pair.first;
+        double y = slice_for_syst->hist_->GetBinContent( global_bin_idx );
+        double err = slice_for_syst->hist_->GetBinError( global_bin_idx );
+        double frac = 0.;
+        if ( y > 0. ) frac = err / y;
+        slice_for_syst->hist_->SetBinContent( global_bin_idx, frac );
+        slice_for_syst->hist_->SetBinError( global_bin_idx, 0. );
+      }
+
+      // Check whether the current covariance matrix name is present in
+      // the vector defined above this loop. If it isn't, don't bother to
+      // plot it, and just move on to the next one.
+      auto cbegin = cov_mat_keys.cbegin();
+      auto cend = cov_mat_keys.cend();
+      auto iter = std::find( cbegin, cend, key );
+      if ( iter == cend ) continue;
+
+      frac_uncertainty_hists[ key ] = slice_for_syst->hist_.get();
+
+      if ( color <= 9 ) ++color;
+      if ( color == 5 ) ++color;
+      if ( color >= 10 ) color += 10;
+
+      slice_for_syst->hist_->SetLineColor( color );
+      slice_for_syst->hist_->SetLineWidth( 3 );
+    }
+
+    TCanvas* c2000 = new TCanvas;
+    TLegend* lg2 = new TLegend( 0.7, 0.7, 0.9, 0.9 );
+
+    auto* total_frac_err_hist = frac_uncertainty_hists.at( "total" );
+    total_frac_err_hist->SetStats( false );
+    total_frac_err_hist->GetYaxis()->SetRangeUser( 0.,
+      total_frac_err_hist->GetMaximum() * 1.05 );
+    total_frac_err_hist->SetLineColor( kBlack );
+    total_frac_err_hist->SetLineWidth( 3 );
+    total_frac_err_hist->Draw( "hist" );
+
+    lg2->AddEntry( total_frac_err_hist, "total", "l" );
+
+    for ( auto& pair : frac_uncertainty_hists ) {
+      const auto& name = pair.first;
+      TH1* hist = pair.second;
+      // We already plotted the "total" one above
+      if ( name == "total" ) continue;
+
+      lg2->AddEntry( hist, name.c_str(), "l" );
+      hist->Draw( "same hist" );
+
+      for(int h_iter = 1; h_iter < hist->GetNbinsX(); h_iter++){
+        std::cout << name << " frac err in bin #" << h_iter<< " = "<< hist->GetBinContent( h_iter )*100. << "%\n";
+      }
+    }
+
+    lg2->Draw( "same" );
+
+    std::cout << "Total frac error in bin #1 = "
+      << total_frac_err_hist->GetBinContent( 1 )*100. << "%\n";
+
+    c2000->SaveAs(text_title_pdf2);
+  } // slices
+
+
+
+/////////////////////////////////////
+/*   
       TH1D* unfolded_events_vals_clone = (TH1D*)unfolded_events_vals->Clone("unfolded_events_vals_clone");
       TH1D* fake_data_truth_vals_clone = (TH1D*)fake_data_truth_vals->Clone("fake_data_truth_vals_clone");
 
@@ -526,7 +664,7 @@ unfolded_events_vals_clone->Divide(unfolded_events_vals_clone);
    -99,
    c2,
    text_title_pdf2 );
-
+*/
 
 
 

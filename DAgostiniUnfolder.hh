@@ -132,7 +132,7 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
       // as the smearceptance matrix (i.e., rows are ordinary reco bins,
       // columns are true signal bins).
       auto& mat_ref = err_prop_mc_vec.emplace_back( num_ordinary_reco_bins,
-        num_true_signal_bins );
+        num_true_signal_bins ); //assign std::vector back to mat_ref in another line
 
       mat_ref.Zero();
     }

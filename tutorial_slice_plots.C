@@ -30,8 +30,8 @@ void tutorial_slice_plots() {
 
   auto* syst_ptr = new MCC9SystematicsCalculator(
 //    "/exp/annie/data/users/jminock/stv-analysis/stv-univmake-output-20k.root",
-    "/exp/annie/app/users/jminock/xsec_analyzer/output.root",
-    "systcalc.conf" );
+    "output_0pi_2percent.root",
+    "systcalc_data.conf" );
   auto& syst = *syst_ptr;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
@@ -69,8 +69,8 @@ void tutorial_slice_plots() {
 
     // We now have all of the reco bin space histograms that we need as input.
     // Use them to make new histograms in slice space.
-//    SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
-//      *reco_bnb_hist, slice, &matrix_map.at("BNBstats") );
+    SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
+      *reco_bnb_hist, slice, &matrix_map.at("BNBstats") );
 
 //    SliceHistogram* slice_ext = SliceHistogram::make_slice_histogram(
 //      *reco_ext_hist, slice, &matrix_map.at("EXTstats") );
@@ -116,7 +116,7 @@ void tutorial_slice_plots() {
     }
 
     TCanvas* c1 = new TCanvas;
-/*    slice_bnb->hist_->SetLineColor( kBlack );
+    slice_bnb->hist_->SetLineColor( kBlack );
     slice_bnb->hist_->SetLineWidth( 3 );
     slice_bnb->hist_->SetMarkerStyle( kFullCircle );
     slice_bnb->hist_->SetMarkerSize( 0.8 );
@@ -127,8 +127,8 @@ void tutorial_slice_plots() {
 
     slice_bnb->hist_->Draw( "e" );
 
-    slice_pred_stack->Draw( "hist same" );
-*/
+//    slice_pred_stack->Draw( "hist same" );
+
     slice_mc_plus_ext->hist_->SetLineWidth( 3 );
     slice_mc_plus_ext->hist_->Draw( "same hist e" );
 
@@ -154,7 +154,7 @@ void tutorial_slice_plots() {
     // in the ROOT plot. All configured fractional uncertainties will be
     // included in the output pgfplots file regardless of whether they appear
     // in this vector.
-    const std::vector< std::string > cov_mat_keys = { "total","flux","xsec_total","MCstats","detVar_total" };
+    const std::vector< std::string > cov_mat_keys = { "total","flux","xsec_total","MCstats","xsec_multi","xsec_unisim","BNBstats" };
  
 /*    const std::vector< std::string > cov_mat_keys = { "total",
       "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
@@ -226,8 +226,9 @@ void tutorial_slice_plots() {
       lg2->AddEntry( hist, name.c_str(), "l" );
       hist->Draw( "same hist" );
 
-      std::cout << name << " frac err in bin #1 = "
-        << hist->GetBinContent( 1 )*100. << "%\n";
+      for(int h_iter = 1; h_iter < hist->GetNbinsX(); h_iter++){
+        std::cout << name << " frac err in bin #"<<h_iter<<" = " << hist->GetBinContent( h_iter )*100. << "%\n";
+      }
     }
 
     lg2->Draw( "same" );

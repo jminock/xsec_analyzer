@@ -1,0 +1,3 @@
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_bg_ntuple.root
+/pnfs/annie/persistent/users/jminock/v1_3_3_stv_ntuples/PhaseIITree_400k_stv_ntuple.root
+/pnfs/annie/persistent/users/jminock/v1_3_3_data/PhaseIITree_2percent_data_ntuple.root

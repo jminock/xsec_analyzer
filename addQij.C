@@ -22,8 +22,8 @@ double LoC(double vtxx, double vtxy, double vtxz, double pmt1x, double pmt1y, do
 
 void addQij(){
 
-	int runs = 50;//200;
-	int subruns = 20;
+	int runs = 4000;//4000;
+	int subruns = 1;
 	//Loop through runs
 	for(int rn = 0; rn < runs; rn++){
 		std::cout << "Looping through run " << std::to_string(rn) << std::endl;

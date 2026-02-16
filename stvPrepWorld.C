@@ -11,6 +11,8 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <cmath>
 #include <algorithm>
 
@@ -28,7 +30,7 @@ bool FidVol(double x, double y, double z){
         }
 }
 
-void stvPrep(){
+void stvPrepWorld(){
         //insert variables here
         int rnTrig;
         int rnMRD;
@@ -59,6 +61,7 @@ void stvPrep(){
         double rcsr, rcmr;
 	double Qij, PE;
         double recovtxx, recovtxy, recovtxz;
+	double mrd_eff; //weight for MRD Efficiency correction
 
         vector<double>* MRDTrackAngle = new vector<double>();
         vector<double>* MRDTrackAngleError = new vector<double>();
@@ -79,52 +82,23 @@ void stvPrep(){
 	vector<int>* mcFolPPDG = new vector<int>();
 //      vector<double>* MRDTrackLengthTrig = new vector<double>();
 //      vector<double>* MRDTrackLengthMRD = new vector<double>();
-/*        vector<double>* All_weight = new vector<double>();
-	vector<double>* All0_weight = new vector<double>();
-	vector<double>* All1_weight = new vector<double>();
-	vector<double>* All2_weight = new vector<double>();
-	vector<double>* All3_weight = new vector<double>();
-	vector<double>* All4_weight = new vector<double>();
-	vector<double>* All5_weight = new vector<double>();
-	vector<double>* flux_All = new vector<double>();
-	vector<double>* flux_horncurrent = new vector<double>();
-	vector<double>* flux_expskin = new vector<double>();
-	vector<double>* flux_piplus = new vector<double>();
-	vector<double>* flux_piminus = new vector<double>();
-	vector<double>* flux_kplus = new vector<double>();
-	vector<double>* flux_kminus = new vector<double>();
-	vector<double>* flux_kzero = new vector<double>();
-	vector<double>* flux_pionine = new vector<double>();
-	vector<double>* flux_pionqe = new vector<double>();
-	vector<double>* flux_piontot = new vector<double>();
-	vector<double>* flux_nucine = new vector<double>();
-	vector<double>* flux_nucqe = new vector<double>();
-	vector<double>* flux_nuctot = new vector<double>();
-        map<string,vector<double>>* xsecweights = new map<string,vector<double>>();
-        map<string,vector<double>>* fluxweights = new map<string,vector<double>>();
-        vector<double>* TCV_weight = new vector<double>();
- */
+ 
 
         //Open file and trees
 
-	int runs = 4000;
-	int subruns = 1;
-	//Loop through runs
-	for(int rn = 0; rn < runs; rn++){
-		std::cout << "Looping through run " << std::to_string(rn) << std::endl;
-	//Loop through run parts (sub runs)
-	for(int srn = 0; srn < subruns; srn++){
-//		std::cout << "Looping through subrun " << std::to_string(srn) << std::endl;
         //Open file and trees
-        string file_path = "/exp/annie/data/users/jminock/temp_add_branches/PhaseIITree_0." + std::to_string(rn) + "." + std::to_string(srn) + ".root";
-//        string file_path = "/pnfs/annie/persistent/users/jminock/v1_3_3_weighted_ntuples/PhaseIITree_0." + std::to_string(rn) + "." + std::to_string(srn) + ".root";
+        string file_path = "/exp/annie/data/users/jminock/temp_add_branches/PhaseIITree_400k_test_ntuple.root";
+	string mrd_cal_file = "/exp/annie/app/users/jminock/ANNIE_Aux_files/.txt"
 
 	//check if files exist
 	if(gSystem->AccessPathName(file_path.c_str())){
 		std::cout << "WARNING: " << file_path << " does not exist. Skipping." << std::endl;
-		continue;
 	}
- 
+	if(gSystem->AccessPathName(mrd_cal_file.c_str())){
+		std::cout << "WARNING: " << mrd_cal_file << " does not exist. Stopping." << std::endl;
+		return false;
+	}
+
         TFile *f = new TFile(file_path.c_str(),"update");
         gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
 //      gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDict.so");
@@ -184,29 +158,6 @@ void stvPrep(){
         tTrig->SetBranchAddress("trueFSLPdg",&mcfslpdg);
 	tTrig->SetBranchAddress("trueFollowerParentPDG",&mcFolPPDG);
         tTrig->SetBranchAddress("triggerNumber",&trigNum);
-//      tTrig->SetBranchAddress("XSecWeights",&xsecweights);
-//      tTrig->SetBranchAddress("FluxWeights",&fluxweights);
-
-	//Weights
-/*	tTrig->SetBranchAddress("weight_All0_UBGenie",&All0_weight);
-	tTrig->SetBranchAddress("weight_All1_UBGenie",&All1_weight);
-	tTrig->SetBranchAddress("weight_All2_UBGenie",&All2_weight);
-	tTrig->SetBranchAddress("weight_All3_UBGenie",&All3_weight);
-	tTrig->SetBranchAddress("weight_All4_UBGenie",&All4_weight);
-	tTrig->SetBranchAddress("weight_horncurrent_FluxUnisim",&flux_horncurrent);
-	tTrig->SetBranchAddress("weight_expskin_FluxUnisim",&flux_expskin);
-	tTrig->SetBranchAddress("weight_pioninexsec_FluxUnisim",&flux_pionine);
-	tTrig->SetBranchAddress("weight_pionqexsec_FluxUnisim",&flux_pionqe);
-	tTrig->SetBranchAddress("weight_piontotxsec_FluxUnisim",&flux_piontot);
-	tTrig->SetBranchAddress("weight_nucleoninexsec_FluxUnisim",&flux_nucine);
-	tTrig->SetBranchAddress("weight_nucleonqexsec_FluxUnisim",&flux_nucqe);
-	tTrig->SetBranchAddress("weight_nucleontotxsec_FluxUnisim",&flux_nuctot);
-	tTrig->SetBranchAddress("weight_piplus_PrimaryHadronSWCentralSplineVariation",&flux_piplus);
-	tTrig->SetBranchAddress("weight_piminus_PrimaryHadronSWCentralSplineVariation",&flux_piminus);
-	tTrig->SetBranchAddress("weight_kminus_PrimaryHadronNormalization",&flux_kminus);
-	tTrig->SetBranchAddress("weight_kzero_PrimaryHadronSanfordWang",&flux_kzero);
-	tTrig->SetBranchAddress("weight_kplus_PrimaryHadronFeynmanScaling",&flux_kplus);
-*/
 
         //Simple Reco
         tTrig->SetBranchAddress("simpleRecoFlag",&simpleflag);
@@ -253,12 +204,15 @@ void stvPrep(){
 	TBranch *RinMRDInc = tTrig->Branch("recoInc_contained_in_MRD",&recoMRDInc);
 	TBranch *RinMRD0pi = tTrig->Branch("reco0pi_contained_in_MRD",&recoMRD0pi);
 	TBranch *R0pi   = tTrig->Branch("reco_0pi",&reco0pi);
-//	TBranch *WAll = tTrig->Branch("weight_All_UBGenie",&All_weight);
-//	TBranch *WfAll = tTrig->Branch("weight_flux_all",&flux_All);
+	TBranch *MRDEff = tTrig->Branch("MRDEff",&mrd_eff);
+
+	//read in calibration file
+	std::vector<double> bins;
+	std::vector<double> factor;
 
         double muon_m = 105.7;
         Long64_t nentriesTrig = tTrig->GetEntries();
-//        std::cout << "TriggerTree: " << nentriesTrig << std::endl;
+        std::cout << "TriggerTree: " << nentriesTrig << std::endl;
         //fill histograms
         for (Long64_t i = 0; i < nentriesTrig; i++) {
                 tTrig->GetEntry(i);
@@ -284,33 +238,6 @@ void stvPrep(){
 		recoMRDInc = numMRDTracks > 0 ? MRDStop->at(0) : false;
 		reco0pi = ((PE > 200.*Qij*Qij) && (PE < 2000.*std::cbrt(4.5-Qij)+1500.));
 
-		//check all the weights have the same number of universes
-/*		if(All0_weight->size() != 100 || All1_weight->size() != 100 || All2_weight->size() != 100 || All3_weight->size() != 100 || All4_weight->size() != 100) {
-			std::cerr << "[ERROR] wrong universe size " << i << ": " << All0_weight->size() << " " << All1_weight->size() << " " << All2_weight->size() << " " << All3_weight->size() << " " << All4_weight->size() << std::endl;
-			return false;
-		}
-		if(flux_horncurrent->size() != 1000 || flux_expskin->size() != 1000 || flux_piplus->size() != 1000 || flux_piminus->size() != 1000 || flux_kplus->size() != 1000 || flux_kminus->size() != 1000 || flux_kzero->size() != 1000 || flux_pionine->size() != 1000 || flux_pionqe->size() != 1000 || flux_piontot->size() != 1000 || flux_nucine->size() != 1000 || flux_nucqe->size() != 1000 || flux_nuctot->size() != 1000 ) {
-			std::cerr << "[ERROR] wrong universe size " << i << ": " << flux_horncurrent->size() << " " << flux_expskin->size() << " " << flux_piplus->size() << " " << flux_piminus->size() << " " << flux_kplus->size() << " " << flux_kminus->size() << " " << flux_kzero->size() << " " << flux_pionine->size() << " " << flux_pionqe->size() << " " << flux_piontot->size() << " " << flux_nucine->size() << " " << flux_nucqe->size() << " " << flux_nuctot->size() << std::endl;
-			return false;
-		}
-*/
-		//XSec weight appendage
-//		All_weight->insert(All_weight->end(), All0_weight->begin(), All0_weight->end());
-//		All_weight->insert(All_weight->end(), All1_weight->begin(), All1_weight->end());
-//		All_weight->insert(All_weight->end(), All2_weight->begin(), All2_weight->end());
-//		All_weight->insert(All_weight->end(), All3_weight->begin(), All3_weight->end());
-//		All_weight->insert(All_weight->end(), All4_weight->begin(), All4_weight->end());
-
-//		for(int j = 0; j < All0_weight->size(); j++){
-//			All_weight->push_back(All0_weight->at(j));
-//			if(All_weight->at(j) != All0_weight->at(j)) std::cout << "[ERROR] weight mismatch: " << i << " " << j << " " << All_weight->at(j) << " " << All0_weight->at(j) << std::endl;
-//			std::cout << All0_weight->at(j) << std::endl;
-//		}
-
-//		for(int j = 0; j < 1000; j++){
-//			flux_All->push_back(flux_horncurrent->at(j)*flux_expskin->at(j)*flux_piplus->at(j)*flux_piminus->at(j)*flux_kplus->at(j)*flux_kminus->at(j)*flux_kzero->at(j)*flux_pionine->at(j)*flux_pionqe->at(j)*flux_piontot->at(j)*flux_nucine->at(j)*flux_nucqe->at(j)*flux_nuctot->at(j));
-//		}
-//All and flux_all
 
                 TFV->Fill();
 		RFV->Fill();
@@ -324,17 +251,11 @@ void stvPrep(){
 		RinMRDInc->Fill();
 		RinMRD0pi->Fill();
 		R0pi->Fill();
-//		WAll->Fill();
-//		WfAll->Fill();
-
-//		All_weight->clear();
-//		flux_All->clear();
+		MRDEff->Fill();
 	}
 
 
         tTrig->Write("",TObject::kOverwrite);
 //      tTrig->ResetBranchAddresses();
         delete f;
-	} //end of subrun
-	} //end of run
 }
