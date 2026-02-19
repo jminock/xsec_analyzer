@@ -29,20 +29,17 @@ enum class NtupleFileType {
 
   // *** DetVar MC ***
   kDetVarMCCV, // central value
-  kDetVarMCLYatten, // light-yield attenuation
-  kDetVarMCLYdown, // light-yield down
-  kDetVarMCLYrayl, // light-yield Rayleigh scattering
-  kDetVarMCRecomb2, // light-yield recombination 2
-  kDetVarMCSCE, // space charge effect
-  kDetVarMCWMAngleXZ, // wireMod angle XZ
-  kDetVarMCWMAngleYZ, // wireMod angle YZ
-  kDetVarMCWMdEdx, // wireMod dE/dx
-  kDetVarMCWMX, // wireMod X
-  kDetVarMCWMYZ, // wireMod YZ
   kDetVarMCCVExtra, // alternate CV for small samples
-  kDetVarMCShiftE, // ANNIE generalized DV calibration
-  kDetVarMCMRDEff, // ANNIE MRD Efficiency Calibration
-  kDetVarMCDirtMu, // ANNIE Dirt muon correction
+  kDetVarMCShiftE1, // ANNIE generalized DV calibration universes
+  kDetVarMCShiftE2,
+  kDetVarMCShiftE3,
+  kDetVarMCShiftE4,
+  kDetVarMCShiftE5,
+  kDetVarMCShiftE6,
+  kDetVarMCShiftE7,
+  kDetVarMCShiftE8,
+  kDetVarMCShiftE9,
+  kDetVarMCShiftE10,
 
   // An alternate CV MC simulation
   kAltCVMC,
@@ -53,15 +50,12 @@ enum class NtupleFileType {
 
 // Utility functions for manipulating NtupleFileType values
 bool ntuple_type_is_detVar( const NtupleFileType& type ) {
-  constexpr std::array< NtupleFileType, 15 > detVar_types = {
-    NtupleFileType::kDetVarMCCV, NtupleFileType::kDetVarMCLYatten,
-    NtupleFileType::kDetVarMCLYdown, NtupleFileType::kDetVarMCLYrayl,
-    NtupleFileType::kDetVarMCRecomb2, NtupleFileType::kDetVarMCSCE,
-    NtupleFileType::kDetVarMCWMAngleXZ, NtupleFileType::kDetVarMCWMAngleYZ,
-    NtupleFileType::kDetVarMCWMdEdx, NtupleFileType::kDetVarMCWMX,
-    NtupleFileType::kDetVarMCWMYZ, NtupleFileType::kDetVarMCCVExtra,
-    NtupleFileType::kDetVarMCShiftE, NtupleFileType::kDetVarMCMRDEff,
-    NtupleFileType::kDetVarMCDirtMu
+  constexpr std::array< NtupleFileType, 12 > detVar_types = {
+    NtupleFileType::kDetVarMCCV, NtupleFileType::kDetVarMCCVExtra,
+    NtupleFileType::kDetVarMCShiftE1, NtupleFileType::kDetVarMCShiftE2, NtupleFileType::kDetVarMCShiftE3,
+    NtupleFileType::kDetVarMCShiftE4, NtupleFileType::kDetVarMCShiftE5, NtupleFileType::kDetVarMCShiftE6,
+    NtupleFileType::kDetVarMCShiftE7, NtupleFileType::kDetVarMCShiftE8, NtupleFileType::kDetVarMCShiftE9,
+    NtupleFileType::kDetVarMCShiftE10
   };
 
   const auto begin = detVar_types.cbegin();

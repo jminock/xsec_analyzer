@@ -489,11 +489,10 @@ void covMat( const std::string& input_respmat_file_name,
   // Note that a wireMod dE/dx sample is available, but we exclude it because it
   // is deprecated in favor of Recomb2. Using both together would be
   // double-counting.
-  constexpr std::array< NtupleFileType, 12 > detVar_labels = {
-    NFT::kDetVarMCLYatten, NFT::kDetVarMCLYdown, NFT::kDetVarMCLYrayl,
-    NFT::kDetVarMCRecomb2, NFT::kDetVarMCSCE, NFT::kDetVarMCWMAngleXZ,
-    NFT::kDetVarMCWMAngleYZ, NFT::kDetVarMCWMX, NFT::kDetVarMCWMYZ,
-    NFT::kDetVarMCShiftE, NFT::kDetVarMCMRDEff, NFT::kDetVarMCDirtMu
+  constexpr std::array< NtupleFileType, 10 > detVar_labels = {
+    NFT::kDetVarMCShiftE1, NFT::kDetVarMCShiftE2, NFT::kDetVarMCShiftE3, NFT::kDetVarMCShiftE4,
+    NFT::kDetVarMCShiftE5, NFT::kDetVarMCShiftE6, NFT::kDetVarMCShiftE7, NFT::kDetVarMCShiftE8,
+    NFT::kDetVarMCShiftE9, NFT::kDetVarMCShiftE10
   };
 
   std::vector< DirNamecycle > detvar_universes;

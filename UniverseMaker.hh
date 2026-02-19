@@ -588,6 +588,15 @@ void UniverseMaker::build_universes(
   // used in each vector of weights
   input_chain_.GetEntry( 0 );
 
+  // Set up stoarge for event calibration weight branches.
+  // Will only work with MC events
+  double mrd_eff;
+  double dirt_mu;
+  if(is_mc){
+    input_chain_.SetBranchAddress("MRDEff",&mrd_eff);
+    input_chain_.SetBranchAddress("DirtMu",&dirt_mu);
+  }
+
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
 
@@ -596,6 +605,10 @@ void UniverseMaker::build_universes(
     if(entry%1000==0) std::cout<<"\rUniverseMaker::build_universes "<<entry<<" of "<<input_chain_.GetEntries()<<std::flush;
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
+
+    //Multiply in calibration weight if MC
+    double cal_wgt = 1.;
+    if(is_mc) cal_wgt = mrd_eff*dirt_mu;
 
     // If the current entry is in a new TTree, then have all of the
     // TTreeFormula objects make the necessary updates
@@ -614,7 +627,7 @@ void UniverseMaker::build_universes(
       for ( int el = 0; el < num_formula_elements; ++el ) {
         double formula_wgt = rbf->EvalInstance( el );
         if ( formula_wgt ){
-          matched_reco_bins.emplace_back( rb, formula_wgt );
+          matched_reco_bins.emplace_back( rb, formula_wgt*cal_wgt );
           // std::cout<<" rb: "<<rb;
         }
       }
@@ -628,7 +641,7 @@ void UniverseMaker::build_universes(
       for ( int el = 0; el < num_formula_elements; ++el ) {
         double formula_wgt = cbf->EvalInstance( el );
         if ( formula_wgt ) {
-          matched_category_indices.emplace_back( c, formula_wgt );
+          matched_category_indices.emplace_back( c, formula_wgt*cal_wgt );
         }
       }
     }
@@ -649,7 +662,7 @@ void UniverseMaker::build_universes(
           double formula_wgt = tbf->EvalInstance( el );
           if ( formula_wgt )
           {
-            matched_true_bins.emplace_back( tb, formula_wgt );
+            matched_true_bins.emplace_back( tb, formula_wgt*cal_wgt );
           }
         }
       } // true bins
