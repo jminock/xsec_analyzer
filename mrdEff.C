@@ -38,30 +38,64 @@ void mrdEff(){
         //insert variables here
 	double mrd_eff; //weight for MRD Efficiency correction
 
+	double simpletracklength;
+
         vector<double>* MRDTrackStartX = new vector<double>();
         vector<double>* MRDTrackStartY = new vector<double>();
         vector<double>* MRDTrackStartZ = new vector<double>();
         vector<bool>* MRDStop = new vector<bool>();
         
-        //Open file and trees
-
-        //Open file and trees
-        string file_path = "/exp/annie/data/users/jminock/temp_add_branches/PhaseIITree_tank_ntuple.root";
+        //Open calibration file
 	string mrd_cal_file = "/exp/annie/app/users/jminock/ANNIE_AuxFiles/MRDEffCal.txt";
-
-	//check if files exist
-	if(gSystem->AccessPathName(file_path.c_str())){
-		std::cout << "WARNING: " << file_path << " does not exist. Skipping." << std::endl;
-	}
 	if(gSystem->AccessPathName(mrd_cal_file.c_str())){
 		std::cout << "WARNING: " << mrd_cal_file << " does not exist. Stopping." << std::endl;
 		return false;
 	}
 
+	//read in calibration file
+	std::vector<double> bins_front;
+	std::vector<double> bins_TL;
+	std::vector<double> factorX;
+	std::vector<double> factorY;
+	std::vector<double> factorTL;
+	string bins_front_str = "";
+	string bins_TL_str = "";
+	string factorX_str = "";
+	string factorY_str = "";
+	string factorTL_str = "";
+
+	std::ifstream cal_file(mrd_cal_file.c_str(), ios::in);
+	cal_file >> bins_front_str;
+	cal_file >> bins_TL_str;
+	cal_file >> factorX_str;
+	cal_file >> factorY_str;
+	cal_file >> factorTL_str;
+	cal_file.close();
+
+	//break into appropriate vectors
+	breakCSV(bins_front_str, bins_front);
+	breakCSV(bins_TL_str, bins_TL);
+	breakCSV(factorX_str, factorX);
+	breakCSV(factorY_str, factorY);
+	breakCSV(factorTL_str, factorTL);
+
+	int runs = 5000;
+	//Loop through runs
+	for(int rn = 4960; rn < runs; rn++){
+		std::cout << "Looping through run " << std::to_string(rn) << std::endl;
+        //Open file and trees
+        string file_path = "/exp/annie/data/users/jminock/temp_add_branches/PhaseIITree_0." + std::to_string(rn) + ".0.root";
+
+	//check if files exist
+	if(gSystem->AccessPathName(file_path.c_str())){
+		std::cout << "WARNING: " << file_path << " does not exist. Skipping." << std::endl;
+		continue;
+	}
+
         TFile *f = new TFile(file_path.c_str(),"update");
-        gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
+//        gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
 //      gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDict.so");
-        gInterpreter->GenerateDictionary("map<string,vector<double>>", "map;string;vector");
+//        gInterpreter->GenerateDictionary("map<string,vector<double>>", "map;string;vector");
         TTree *tTrig = (TTree*)f->Get("phaseIITriggerTree");
 
         //Set branch addresses
@@ -69,45 +103,36 @@ void mrdEff(){
         tTrig->SetBranchAddress("MRDTrackStartY",&MRDTrackStartY);
         tTrig->SetBranchAddress("MRDTrackStartZ",&MRDTrackStartZ);
         tTrig->SetBranchAddress("MRDStop",&MRDStop);
+	tTrig->SetBranchAddress("simpleRecoTrackLengthInMRD",&simpletracklength);
 
 	TBranch *MRDEff = tTrig->Branch("MRDEff",&mrd_eff);
 
-	//read in calibration file
-	std::vector<double> bins;
-	std::vector<double> factor;
-	string bins_str = "";
-	string factor_str = "";
-
-	std::ifstream cal_file(mrd_cal_file.c_str(), ios::in);
-	cal_file >> bins_str;
-	cal_file >> factor_str;
-	cal_file.close();
-
-	breakCSV(bins_str, bins);
-	breakCSV(factor_str, factor);
-
         double muon_m = 105.7;
         Long64_t nentriesTrig = tTrig->GetEntries();
-        std::cout << "TriggerTree: " << nentriesTrig << std::endl;
+//        std::cout << "TriggerTree: " << nentriesTrig << std::endl;
         //fill histograms
         for(Long64_t i = 0; i < nentriesTrig; i++) {
                 tTrig->GetEntry(i);
-                if(i%1000 == 0) std::cout << i << std::endl;
-                //Establish MRD Y variable to use if there are multiple tracks
+//                if(i%1000 == 0) std::cout << i << std::endl;
+		//MRD Calibration
+                //Establish MRD X/Y variable to use if there are multiple tracks
 		int ntracks = MRDTrackStartY->size();
-		if(ntracks <= 0){ //assign 0 for no MRD tracks
-			mrd_eff = 0.0;
-			MRDEff->Fill();
-			continue;
+		if(ntracks <= 0){ //assign 1 for no MRD tracks
+			mrd_eff = 1.0;
+		} else {
+			double MRD_X = -9999;
+			double MRD_Y = -9999;
+			for(int j = 0; j < ntracks; j++){
+				if(MRDStop->at(j)) MRD_X = MRDTrackStartX->at(j); //confirm its stopping track
+				if(MRDStop->at(j)) MRD_Y = MRDTrackStartY->at(j);
+			}
+			//Establish which bin the event falls into
+			int binX = findBin(MRD_X, 0, bins_front);
+			int binY = findBin(MRD_Y, 0, bins_front);
+			int binTL = findBin(simpletracklength*100, 0, bins_TL);
+			//Assign weight based on bin
+			mrd_eff = factorX[binX]*factorY[binY]*factorTL[binTL];
 		}
-		double MRD_Y = -9999;
-		for(int j = 0; j < ntracks; j++){
-			if(MRDStop->at(j)) MRD_Y = MRDTrackStartY->at(j); //confirm its stopping track
-		}
-		//Establish which bin the event falls into
-		int bin = findBin(MRD_Y, 0, bins);
-		//Assign weight based on bin
-		mrd_eff = factor[bin];
 		MRDEff->Fill();
 	}
 
@@ -115,4 +140,5 @@ void mrdEff(){
         tTrig->Write("",TObject::kOverwrite);
 //      tTrig->ResetBranchAddresses();
         delete f;
+	} //end of loop run
 }

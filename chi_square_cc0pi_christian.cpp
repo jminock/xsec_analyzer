@@ -120,22 +120,23 @@ void Test_plot() {
     char text_title_pdf3[2024];
     char text_title_pdf4[2024];
     char RootName[1024];
-  sprintf(text_title_pdf1, "Make_Plots_Annie_unimake_0pi_noDV.pdf(","" );
-
-  sprintf(text_title_pdf2, "Make_Plots_Annie_unimake_0pi_noDV.pdf","" );
-  sprintf(text_title_pdf3, "Make_Plots_Annie_unimake_0pi_noDV.pdf)","" );
-  sprintf(text_title_pdf4, "Make_Plots_Annie_unimake_0pi_noDV","" );
+  sprintf(text_title_pdf1, "Make_Plots_Annie_unimake_0pi_full.pdf(","" );
+  sprintf(text_title_pdf2, "Make_Plots_Annie_unimake_0pi_full.pdf","" );
+  sprintf(text_title_pdf3, "Make_Plots_Annie_unimake_0pi_full.pdf)","" );
+  sprintf(text_title_pdf4, "Make_Plots_Annie_unimake_0pi_full","" );
 
 std::string text_title_pdf2_string(text_title_pdf2);
 
     auto& fpm = FilePropertiesManager::Instance();
-    fpm.load_file_properties( "file_properties_closure.txt" );
+    fpm.load_file_properties( "file_properties.txt" );
    TCanvas* c4 = new TCanvas("c4");
    c4-> Print(text_title_pdf1);
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
    
    //  std::vector<double> nbins = {0.8,0.95,1.0};
      std::vector<double> nbins = {600.,740.,860.,960.,1080.,1200};
+//     std::vector<double> nbins = {600.,710.,860.,960.,1080.,1200.};
+//     std::vector<double> nbins = {600.,700.,800.,900.,1000.,1100.,1200.};
 //     std::vector<double> nbins = {500.,680.,770.,860.,950.,1040.,1160.,1400.};
 
 
@@ -145,15 +146,15 @@ std::string text_title_pdf2_string(text_title_pdf2);
   //ANNIE
   auto* mcc9 = new MCC9SystematicsCalculator(
   //    "/exp/annie/data/users/jminock/stv-analysis/stv-univmake-output-20k-pmu.root",
-    "output.root",
+    "output_0pi_full.root",
     "systcalc_data.conf" );
 
   const auto &syst = *mcc9;
 
   TH1D* genie_cv_truth_vals = new TH1D("genie_cv_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
-  TH1D* fake_data_truth_vals = new TH1D("fake_data_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
+//  TH1D* fake_data_truth_vals = new TH1D("fake_data_truth_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
   TH1D* unfolded_events_vals = new TH1D("unfolded_events_vals", ";p_{#mu}; Scaled Events", nbins.size() - 1, nbins.data());
-  TH1D* fake_data_reco_vals = new TH1D("fake_data_reco_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
+//  TH1D* fake_data_reco_vals = new TH1D("fake_data_reco_vals", ";p_{muon}; Scaled Events", nbins.size() - 1, nbins.data());
 
 
   TH1D* reco_bnb_hist = syst.data_hists_.at( NFT::kOnBNB ).get();
@@ -222,7 +223,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
    
    std::cout<<" Total POT ="<< total_pot << std::endl;
   
-  const auto& fake_data_univ = mcc9->fake_data_universe();
+/*  const auto& fake_data_univ = mcc9->fake_data_universe();
   TH1D* fake_data_truth = fake_data_univ->hist_true_.get(); 
   TH1D* fake_data_reco = fake_data_univ->hist_reco_.get(); 
 
@@ -242,7 +243,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
    -99,
    c4,
    text_title_pdf2_string);
- 
+ */
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   auto smearcept_ptr = syst.get_cv_smearceptance_matrix();
@@ -275,7 +276,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   
-    std::unique_ptr< Unfolder > unfolder (new WienerSVDUnfolder( true, WienerSVDUnfolder::RegularizationMatrixType::kSecondDeriv ) );
+    std::unique_ptr< Unfolder > unfolder (new WienerSVDUnfolder( true, WienerSVDUnfolder::RegularizationMatrixType::kFirstDeriv ) );
 //    std::unique_ptr< Unfolder > unfolder (new DAgostiniUnfolder( DAgostiniUnfolder::ConvergenceCriterion::FigureOfMerit, 0.025 ) );
 
     auto result = unfolder->unfold( *mcc9 );
@@ -307,12 +308,13 @@ std::string text_title_pdf2_string(text_title_pdf2);
         ///////////////////////////////////////////////////
       std::cout<<"background subtracted data [reco_signal]: "<<data_signal->operator()( t, 0 )<<std::endl;
       std::cout<<"CV_true_signal: "<<true_signal->operator()( t, 0 )<<std::endl;
-      std::cout<<"Scaled CV_true_signal to BNB POT: "<<true_signal->operator()( t, 0 )*0.259<<std::endl;//WHERE IS THAT FACTOR COMING FROM???
+      std::cout<<"Scaled CV_true_signal to BNB POT: "<<true_signal->operator()( t, 0 )*(1.68/2.7)<<std::endl;//WHERE IS THAT FACTOR COMING FROM???
          //TH2D *h = new TH2D(*result.err_prop_matrix_);
          /////////////////////////////////////////////////         
 
       evts = result.unfolded_signal_->operator()( t, 0 );
       error = std::sqrt( std::max(0., result.cov_matrix_->operator()( t, t )) );
+//      error = std::max(0., result.cov_matrix_->operator()( t, t ));
 
       std::cout << "evts: " << evts << std::endl;
       unfolded_events->SetBinContent( t + 1, evts );
@@ -373,10 +375,10 @@ std::string text_title_pdf2_string(text_title_pdf2);
 
 
   multiply_1d_hist_by_matrix(A_C, genie_cv_truth);
-  multiply_1d_hist_by_matrix(A_C, fake_data_truth);
+//  multiply_1d_hist_by_matrix(A_C, fake_data_truth);
 
   for ( int t = 0; t < nbins.size() - 1; ++t ) { 
-      fake_data_truth_vals->SetBinContent( t + 1, fake_data_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
+//      fake_data_truth_vals->SetBinContent( t + 1, fake_data_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
       genie_cv_truth_vals->SetBinContent( t + 1, genie_cv_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
   }
 
@@ -386,11 +388,13 @@ std::string text_title_pdf2_string(text_title_pdf2);
   for ( int t = 0; t < nbins.size() - 1; ++t ) { 
      for ( int u = 0; u < nbins.size() - 1 ; ++u ) {
          result.cov_matrix_->operator()(u,t) = result.cov_matrix_->operator()(u,t)/conv_factor/conv_factor/(nbins[u+1] -  nbins[u])/(nbins[t+1] -  nbins[t]);
+         std::cout << result.cov_matrix_->operator()(u,t) << " ";
       }
+     std::cout << std::endl;
   }
 
   auto inv_cov_mat = invert_matrix(*result.cov_matrix_, 1e-4 );
-   //  auto inv_cov_mat = invert_matrix(*result.cov_matrix_);
+//     auto inv_cov_mat = invert_matrix(*result.cov_matrix_);
 
 
   TCanvas* c2 = new TCanvas("c2");
@@ -417,7 +421,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
   leg->AddEntry(genie_cv_truth_vals, TString::Format("p = %.2f",  p_value), "");
   //leg->AddEntry(genie_cv_truth_vals, TString::Format("p = %g || #sigma = %g",  p_value, sigma), "");
 
-  double chi_square_fake = 0;
+/*  double chi_square_fake = 0;
   for (int k=0; k<inv_cov_mat->GetNrows(); k++) {
        for (int j=0; j<inv_cov_mat->GetNcols(); j++) {
            chi_square_fake += (unfolded_events_vals->GetBinContent(k+1) - fake_data_truth_vals->GetBinContent(k+1))*(inv_cov_mat->operator()(k,j))*(unfolded_events_vals->GetBinContent(j+1) - fake_data_truth_vals->GetBinContent(j+1));
@@ -432,7 +436,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
   leg->AddEntry(fake_data_truth_vals, TString::Format("#chi^{2} / d.o.f = %.2f / %g ", chi_square_fake, dof), "");
   //leg->AddEntry(fake_data_truth_vals, TString::Format("p = %g || #sigma = %g", p_value, sigma), "");
   leg->AddEntry(fake_data_truth_vals, TString::Format("p = %.2f", p_value), "");
-
+*/
   unfolded_events_vals->SetStats(0);
   unfolded_events_vals->SetLineWidth(3);
   unfolded_events_vals->SetLineColor(kBlack);
@@ -470,23 +474,23 @@ std::string text_title_pdf2_string(text_title_pdf2);
     //leg->AddEntry(h_lower, "Lower Bound", "l");
   
   //unfolded_events_vals->Draw("e");
-  fake_data_truth_vals->SetLineColor( kBlue );
-  fake_data_truth_vals->SetLineWidth( 3 );
-  fake_data_truth_vals->SetLineStyle( 2 );
-  fake_data_truth_vals->Draw( "hist same" ); //DRAW
+//  fake_data_truth_vals->SetLineColor( kBlue );
+//  fake_data_truth_vals->SetLineWidth( 3 );
+//  fake_data_truth_vals->SetLineStyle( 2 );
+//  fake_data_truth_vals->Draw( "hist same" ); //DRAW
   genie_cv_truth_vals->SetLineColor( kMagenta - 3 );
   genie_cv_truth_vals->SetLineWidth( 3 );
   genie_cv_truth_vals->SetLineStyle( 2 );
   genie_cv_truth_vals->Draw( "hist same" ); //DRAW
   
 //  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
-  leg->AddEntry(unfolded_events_vals,"Unfolded Fake BNB data","l");
+  leg->AddEntry(unfolded_events_vals,"Unfolded BNB data","l");
 leg->Draw();
   c2->SetLeftMargin(0.2);
   c2->SaveAs(text_title_pdf2);  
 
 
-
+/*
   Draw_HIST(
    fake_data_truth_vals,
   "fake_data_truth_vals",
@@ -501,17 +505,17 @@ leg->Draw();
    -99,
    c2,
    text_title_pdf2 );
-   
+  */ 
    
    
    
       TH1D* unfolded_events_vals_clone = (TH1D*)unfolded_events_vals->Clone("unfolded_events_vals_clone");
-      TH1D* fake_data_truth_vals_clone = (TH1D*)fake_data_truth_vals->Clone("fake_data_truth_vals_clone");
+//      TH1D* fake_data_truth_vals_clone = (TH1D*)fake_data_truth_vals->Clone("fake_data_truth_vals_clone");
 
 
-fake_data_truth_vals_clone->Divide(unfolded_events_vals_clone);
+//fake_data_truth_vals_clone->Divide(unfolded_events_vals_clone);
 unfolded_events_vals_clone->Divide(unfolded_events_vals_clone);
-  
+/*  
   Draw_HIST(
    fake_data_truth_vals_clone,
   "fake_data_truth_vals/unfolded_events_vals",
@@ -526,7 +530,7 @@ unfolded_events_vals_clone->Divide(unfolded_events_vals_clone);
    -99,
    c2,
    text_title_pdf2 );
-
+*/
 
 
 

@@ -9,7 +9,7 @@
 2
 5 1 1
 6 1 2
-"events / POT"
+"fractional uncertainty"
 1 0 6 600 740 860 960 1080 1200
 0
 5

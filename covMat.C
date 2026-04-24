@@ -77,15 +77,16 @@ TH2D* make_covariance_matrix_histogram( const std::string& hist_name,
 // systematic variation of interest
 struct SystInfo {
   SystInfo( const std::string& prefix, size_t count, bool frac, bool avg,
-    bool is_flux ) : wgt_prefix_( prefix ), univ_count_( count ),
+    bool is_flux, bool is_DV ) : wgt_prefix_( prefix ), univ_count_( count ),
     needs_fractional_( frac ), average_over_universes_( avg ),
-    is_flux_variation_( is_flux ) {}
+    is_flux_variation_( is_flux ), is_DV_( is_DV ) {}
 
   std::string wgt_prefix_;
   size_t univ_count_;
   bool needs_fractional_;
   bool average_over_universes_;
   bool is_flux_variation_;
+  bool is_DV_;
 };
 
 const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
@@ -124,31 +125,31 @@ const std::map< std::string, SystInfo > SYSTEMATICS_TO_USE {
 
   // TODO: Double-check the unisims (I wrote this in a hurry)
   { "xsec_AxFFCCQEshape", {"weight_AxFFCCQEshape_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_DecayAngMEC", {"weight_DecayAngMEC_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_NormCCCOH", {"weight_NormCCCOH_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_NormNCCOH", {"weight_NormNCCOH_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_RPA_CCQE", {"weight_RPA_CCQE_UBGenie_", 2u,
-    false, true, false} },
+    false, true, false, false} },
 
   { "xsec_ThetaDelta2NRad", {"weight_ThetaDelta2NRad_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_Theta_Delta2Npi", {"weight_Theta_Delta2Npi_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_VecFFCCQEshape", {"weight_VecFFCCQEshape_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 
   { "xsec_XSecShape_CCMEC", {"weight_XSecShape_CCMEC_UBGenie_", 2u,
-    false, false, false} },
+    false, false, false, false} },
 /*
   { "xsec_xsr_scc_Fa3_SCC", {"weight_xsr_scc_Fa3_SCC_", 10u,
     false, true, false} },
@@ -162,7 +163,7 @@ CovMatResults make_cov_mat( const std::string& cov_mat_name,
   TDirectoryFile& main_dir_file, const UniverseMaker& resp_mat,
   const DirNamecycle& cv_spec,
   const std::vector< DirNamecycle >& universe_spec, bool fractional,
-  bool average_over_universes, bool is_flux_variation )
+  bool average_over_universes, bool is_flux_variation, bool is_DV )
 {
   // Get the total number of true and reco bins for later reference
   size_t num_true_bins = resp_mat.true_bins().size();
@@ -362,7 +363,10 @@ CovMatResults make_cov_mat( const std::string& cov_mat_name,
     covMat_signal->Scale( 1. / num_universes );
     covMat_bkgd->Scale( 1. / num_universes );
   }
-
+  if ( is_DV ) {
+    covMat_signal->Scale( 1. / 60. );//number of DV universes
+    covMat_bkgd->Scale( 1. / 60. );
+  }
   // Prepare histograms of the CV expected counts for signal and background in
   // each reco bin
   TH1D* reco_cv_signal = new TH1D( ("reco_cv_signal_" + cov_mat_name).c_str(),
@@ -423,7 +427,7 @@ CovMatResults make_cov_mat( const std::string& cov_mat_name,
 
   return make_cov_mat( cov_mat_name, main_dir_file, resp_mat, cv_spec,
     universe_spec, info.needs_fractional_, info.average_over_universes_,
-    info.is_flux_variation_ );
+    info.is_flux_variation_, info.is_DV_ );
 }
 
 void covMat( const std::string& input_respmat_file_name,
@@ -489,10 +493,22 @@ void covMat( const std::string& input_respmat_file_name,
   // Note that a wireMod dE/dx sample is available, but we exclude it because it
   // is deprecated in favor of Recomb2. Using both together would be
   // double-counting.
-  constexpr std::array< NtupleFileType, 10 > detVar_labels = {
+  constexpr std::array< NtupleFileType, 60 > detVar_labels = {
     NFT::kDetVarMCShiftE1, NFT::kDetVarMCShiftE2, NFT::kDetVarMCShiftE3, NFT::kDetVarMCShiftE4,
     NFT::kDetVarMCShiftE5, NFT::kDetVarMCShiftE6, NFT::kDetVarMCShiftE7, NFT::kDetVarMCShiftE8,
-    NFT::kDetVarMCShiftE9, NFT::kDetVarMCShiftE10
+    NFT::kDetVarMCShiftE9, NFT::kDetVarMCShiftE10, NFT::kDetVarMCShiftE11, NFT::kDetVarMCShiftE12,
+    NFT::kDetVarMCShiftE13, NFT::kDetVarMCShiftE14, NFT::kDetVarMCShiftE15, NFT::kDetVarMCShiftE16,
+    NFT::kDetVarMCShiftE17, NFT::kDetVarMCShiftE18, NFT::kDetVarMCShiftE19, NFT::kDetVarMCShiftE20,
+    NFT::kDetVarMCShiftE21, NFT::kDetVarMCShiftE22, NFT::kDetVarMCShiftE23, NFT::kDetVarMCShiftE24,
+    NFT::kDetVarMCShiftE25, NFT::kDetVarMCShiftE26, NFT::kDetVarMCShiftE27, NFT::kDetVarMCShiftE28,
+    NFT::kDetVarMCShiftE29, NFT::kDetVarMCShiftE30, NFT::kDetVarMCShiftE31, NFT::kDetVarMCShiftE32,
+    NFT::kDetVarMCShiftE33, NFT::kDetVarMCShiftE34, NFT::kDetVarMCShiftE35, NFT::kDetVarMCShiftE36,
+    NFT::kDetVarMCShiftE37, NFT::kDetVarMCShiftE38, NFT::kDetVarMCShiftE39, NFT::kDetVarMCShiftE40,
+    NFT::kDetVarMCShiftE41, NFT::kDetVarMCShiftE42, NFT::kDetVarMCShiftE43, NFT::kDetVarMCShiftE44,
+    NFT::kDetVarMCShiftE45, NFT::kDetVarMCShiftE46, NFT::kDetVarMCShiftE47, NFT::kDetVarMCShiftE48,
+    NFT::kDetVarMCShiftE49, NFT::kDetVarMCShiftE50, NFT::kDetVarMCShiftE51, NFT::kDetVarMCShiftE52,
+    NFT::kDetVarMCShiftE53, NFT::kDetVarMCShiftE54, NFT::kDetVarMCShiftE55, NFT::kDetVarMCShiftE56,
+    NFT::kDetVarMCShiftE57, NFT::kDetVarMCShiftE58, NFT::kDetVarMCShiftE59, NFT::kDetVarMCShiftE60
   };
 
   std::vector< DirNamecycle > detvar_universes;
@@ -513,7 +529,7 @@ void covMat( const std::string& input_respmat_file_name,
   }
 
   CovMatResults detVarResults = make_cov_mat( "detVar_total", *respmat_dir,
-    rmm, detvar_cv_spec, detvar_universes, true, false, false );
+    rmm, detvar_cv_spec, detvar_universes, true, false, false, true );
 
   // The detector variation uncertainties will be applied globally using the
   // fractional covariance matrices for Run 3 calculated above. For all other

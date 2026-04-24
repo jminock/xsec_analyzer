@@ -205,6 +205,8 @@ double MCC9SystematicsCalculator::evaluate_mc_stat_covariance(
   // before filling the histogram.
   double err = univ.hist_reco2d_->GetBinError( reco_bin_a + 1, reco_bin_b + 1 );
   double err2 = err * err;
+//  std::cout << "error: " << err << ", error^2: " << err2 << std::endl;
+//  std::cout << "content: " << univ.hist_reco2d_->GetBinContent( reco_bin_a + 1, reco_bin_b + 1);
   return err2;
 }
 
@@ -220,5 +222,6 @@ double MCC9SystematicsCalculator::evaluate_data_stat_covariance( int reco_bin_a,
   // before filling the histogram.
   double err = d_hist->GetBinError( reco_bin_a + 1, reco_bin_b + 1 );
   double err2 = err * err;
+//  std::cout << "error: " << err << ", error^2: " << err2 << std::endl;
   return err2;
 }

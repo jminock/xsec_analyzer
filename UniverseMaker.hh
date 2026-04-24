@@ -100,6 +100,8 @@ void apply_cv_correction_weights( const std::string& wgt_name,
     || string_has_end(wgt_name, "_PrimaryHadronSanfordWang")
     || string_has_end(wgt_name, "_PrimaryHadronSWCentralSplineVariation")
     || wgt_name == "weight_reint_all"
+    || wgt_name == "weight_MRDUnc"
+    || wgt_name == "weight_DirtUnc"
     || wgt_name == "weight_xsr_scc_Fa3_SCC"
     || wgt_name == "weight_xsr_scc_Fv3_SCC" )
   {
@@ -606,10 +608,6 @@ void UniverseMaker::build_universes(
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
 
-    //Multiply in calibration weight if MC
-    double cal_wgt = 1.;
-    if(is_mc) cal_wgt = mrd_eff*dirt_mu;
-
     // If the current entry is in a new TTree, then have all of the
     // TTreeFormula objects make the necessary updates
     if ( treenumber != input_chain_.GetTreeNumber() ) {
@@ -627,7 +625,8 @@ void UniverseMaker::build_universes(
       for ( int el = 0; el < num_formula_elements; ++el ) {
         double formula_wgt = rbf->EvalInstance( el );
         if ( formula_wgt ){
-          matched_reco_bins.emplace_back( rb, formula_wgt*cal_wgt );
+//std::cout << formula_wgt << " " << formula_wgt*cal_wgt << std::endl;
+          matched_reco_bins.emplace_back( rb, formula_wgt );
           // std::cout<<" rb: "<<rb;
         }
       }
@@ -641,12 +640,21 @@ void UniverseMaker::build_universes(
       for ( int el = 0; el < num_formula_elements; ++el ) {
         double formula_wgt = cbf->EvalInstance( el );
         if ( formula_wgt ) {
-          matched_category_indices.emplace_back( c, formula_wgt*cal_wgt );
+          matched_category_indices.emplace_back( c, formula_wgt );
         }
       }
     }
 
     input_chain_.GetEntry( entry );
+
+    //Multiply in calibration weight if MC
+    double cal_wgt = 1.;
+    if(is_mc) {
+      if(mrd_eff == 0.) cal_wgt = dirt_mu;
+      else cal_wgt = dirt_mu*mrd_eff;
+//      cal_wgt = dirt_mu*mrd_eff;
+    }
+//    cal_wgt = dirt_mu;
 
     // If we're working with an MC sample, then find the true bin(s)
     // that should be filled for the current event
@@ -662,7 +670,7 @@ void UniverseMaker::build_universes(
           double formula_wgt = tbf->EvalInstance( el );
           if ( formula_wgt )
           {
-            matched_true_bins.emplace_back( tb, formula_wgt*cal_wgt );
+            matched_true_bins.emplace_back( tb, formula_wgt );
           }
         }
       } // true bins
@@ -693,7 +701,7 @@ void UniverseMaker::build_universes(
         apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
 
         // Deal with NaNs, etc. to make a "safe weight" in all cases
-        double safe_wgt = safe_weight( w );
+        double safe_wgt = safe_weight( w ) * cal_wgt;
 
         // Get the universe object that should be filled with the processed
         // event weight
@@ -732,26 +740,26 @@ void UniverseMaker::build_universes(
     auto& univ = universes_.at( UNWEIGHTED_NAME ).front();
     //std::cout<<"DEBUG UNWEIGHTED_NAME: "<<UNWEIGHTED_NAME<<std::endl;
     for ( const auto& tb : matched_true_bins ) {
-      univ.hist_true_->Fill( tb.bin_index_, tb.weight_ );
+      univ.hist_true_->Fill( tb.bin_index_, tb.weight_ * cal_wgt );
 
       for ( const auto& rb : matched_reco_bins ) {
         univ.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,
-          tb.weight_ * rb.weight_ );
+          tb.weight_ * rb.weight_ * cal_wgt );
       } // reco bins
     } // true bins
 
     for ( const auto& rb : matched_reco_bins ) {
 
-      univ.hist_reco_->Fill( rb.bin_index_, rb.weight_ );
+      univ.hist_reco_->Fill( rb.bin_index_, rb.weight_ * cal_wgt );
 
       for ( const auto& c : matched_category_indices ) {
         univ.hist_categ_->Fill( c.bin_index_, rb.bin_index_,
-          c.weight_ * rb.weight_ );
+          c.weight_ * rb.weight_ * cal_wgt );
           //std::cout<<"DEBUG UniverseMaker::build_universes - Point 14.1 with c.bin_index_: "<<c.bin_index_<<" rb.bin_index_: "<<rb.bin_index_<<" c.weight_: "<<c.weight_<<" rb.weight_: "<<rb.weight_<<std::endl;
       }
       for ( const auto& other_rb : matched_reco_bins ) {
         univ.hist_reco2d_->Fill( rb.bin_index_, other_rb.bin_index_,
-          rb.weight_ * other_rb.weight_ );
+          rb.weight_ * other_rb.weight_ * cal_wgt );
       }
 
     } // reco bins
