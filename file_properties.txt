@@ -49,7 +49,7 @@
 #
 # detVar MC samples
 #/pnfs/annie/persistent/users/jminock/v1_3_1_ntuples/PhaseIITree_40k_ntuple.root 1 detVarCVExtra
-/pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_CV_test_stv_ntuple.root 1 detVarCV
+/pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_CV_stv_ntuple.root 1 detVarCV
 /pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_DV1_stv_ntuple.root 1 detVarShiftE1
 /pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_DV2_stv_ntuple.root 1 detVarShiftE2
 /pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_DV3_stv_ntuple.root 1 detVarShiftE3

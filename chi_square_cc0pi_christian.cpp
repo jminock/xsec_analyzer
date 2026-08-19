@@ -1,6 +1,7 @@
-/*Author: P. Englezos <p.englezos@physics.rutgers.edu>
+/*Author: Christian Nguyen
+ *Updated by: James Minock
  *
- * Usage: ./chi_square_cc0pi files.txt
+ * Usage: ./chi_square_cc0pi_christian [inc|0pi]
  *
  */
 
@@ -68,7 +69,7 @@
 void chi_square_all_gens(std::string infiles);
 void multiply_1d_hist_by_matrix(TMatrixD *mat, TH1 *hist);
 bool FidVol(double x, double y, double z);
-void Test_plot();
+void Test_plot(std::string chan);
 
 
 void multiply_1d_hist_by_matrix(TMatrixD *mat, TH1 *hist)
@@ -111,7 +112,7 @@ bool FidVol(double x, double y, double z){
 ///////////////////////////////////////////////////////////////////////////////
 ///
 ///////////////////////////////////////////////////////////////////////////////
-void Test_plot() {
+void Test_plot(std::string chan) {
   gROOT->SetBatch(false);
   gStyle->SetOptStat(0);
 
@@ -119,16 +120,24 @@ void Test_plot() {
     char text_title_pdf2[2024];
     char text_title_pdf3[2024];
     char text_title_pdf4[2024];
+    char text_title_root[2024];
     char RootName[1024];
-  sprintf(text_title_pdf1, "Make_Plots_Annie_unimake_0pi_full.pdf(","" );
-  sprintf(text_title_pdf2, "Make_Plots_Annie_unimake_0pi_full.pdf","" );
-  sprintf(text_title_pdf3, "Make_Plots_Annie_unimake_0pi_full.pdf)","" );
-  sprintf(text_title_pdf4, "Make_Plots_Annie_unimake_0pi_full","" );
+
+    std::string pdf1 = "Make_Plots_Annie_unimake_"+chan+"_full_test.pdf(";
+    std::string pdf2 = "Make_Plots_Annie_unimake_"+chan+"_full_test.pdf";
+    std::string pdf3 = "Make_Plots_Annie_unimake_"+chan+"_full_test.pdf)";
+    std::string pdf4 = "Make_Plots_Annie_unimake_"+chan+"_full_test";
+    std::string root_name = "Make_Plots_Annie_unimake_"+chan+"_full_test.root";
+  sprintf(text_title_pdf1, pdf1.c_str(),"" );
+  sprintf(text_title_pdf2, pdf2.c_str(),"" );
+  sprintf(text_title_pdf3, pdf3.c_str(),"" );
+  sprintf(text_title_pdf4, pdf4.c_str(),"" );
+  sprintf(text_title_root, root_name.c_str(),"" );
 
 std::string text_title_pdf2_string(text_title_pdf2);
 
     auto& fpm = FilePropertiesManager::Instance();
-    fpm.load_file_properties( "file_properties.txt" );
+    fpm.load_file_properties( "input_files/file_properties.txt" );
    TCanvas* c4 = new TCanvas("c4");
    c4-> Print(text_title_pdf1);
    //  std::vector< double > nbins = {-1.,-0.775,-0.675,-0.575,-0.475,-0.4,-0.325,-0.25,-0.175,-0.1,-0.025,0.025,0.1,0.175,0.225,0.275,0.325,0.375,0.425,0.475,0.525,0.575,0.625,0.675,0.725,0.775,0.825,0.85,0.875,0.9,0.925,0.95,0.975,1.};
@@ -140,14 +149,13 @@ std::string text_title_pdf2_string(text_title_pdf2);
 //     std::vector<double> nbins = {500.,680.,770.,860.,950.,1040.,1160.,1400.};
 
 
-   
-   
+  std::string input_file = "output_"+chan+"_full.root";
    
   //ANNIE
   auto* mcc9 = new MCC9SystematicsCalculator(
   //    "/exp/annie/data/users/jminock/stv-analysis/stv-univmake-output-20k-pmu.root",
-    "output_0pi_full.root",
-    "systcalc_data.conf" );
+    input_file.c_str(),
+    "systcalc/systcalc_data.conf" );
 
   const auto &syst = *mcc9;
 
@@ -380,6 +388,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
   for ( int t = 0; t < nbins.size() - 1; ++t ) { 
 //      fake_data_truth_vals->SetBinContent( t + 1, fake_data_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
       genie_cv_truth_vals->SetBinContent( t + 1, genie_cv_truth->GetBinContent(t + 1)/conv_factor/(nbins[t+1] - nbins[t]) );
+      std::cout << genie_cv_truth_vals->GetBinContent(t+1) <<std::endl;
   }
 
  // for ( int t = 0; t < result.cov_matrix_->GetNcols() ; ++t ) {
@@ -388,20 +397,163 @@ std::string text_title_pdf2_string(text_title_pdf2);
   for ( int t = 0; t < nbins.size() - 1; ++t ) { 
      for ( int u = 0; u < nbins.size() - 1 ; ++u ) {
          result.cov_matrix_->operator()(u,t) = result.cov_matrix_->operator()(u,t)/conv_factor/conv_factor/(nbins[u+1] -  nbins[u])/(nbins[t+1] -  nbins[t]);
-         std::cout << result.cov_matrix_->operator()(u,t) << " ";
+//         std::cout << result.cov_matrix_->operator()(u,t) << " ";
       }
-     std::cout << std::endl;
+//     std::cout << std::endl;
   }
 
   auto inv_cov_mat = invert_matrix(*result.cov_matrix_, 1e-4 );
 //     auto inv_cov_mat = invert_matrix(*result.cov_matrix_);
 
+  std::vector<std::string> filenames;
+  std::string filepath_pers = "/pnfs/annie/persistent/users/jminock/genMC/nuisance_flattree/";
+  std::string filepath = "/exp/annie/data/users/cnguyen/flattrees/";
+//  filenames.push_back(filepath+"nui.nuwro.all.root");
+  filenames.push_back(filepath+"NuWro.flat_Oxg_annie_numu.root");
+  filenames.push_back(filepath+"14_1000080160_CC_v3_4_0_G18_10a_02_11a.flat.root");
+  filenames.push_back(filepath+"14_1000080160_CC_v3_4_0_G18_10b_02_11a.flat.root");
+  filenames.push_back(filepath+"14_1000080160_CC_v3_4_0_G18_02a_02_11a.flat.root");
+  filenames.push_back(filepath_pers+"nui.gibuu.true.root");
+  filenames.push_back(filepath_pers+"nui.neut.true.root");
+
+  std::cout << "File Count: " << filenames.size() << std::endl;
 
   TCanvas* c2 = new TCanvas("c2");
-  TLegend *leg=new TLegend(0.6,0.5,0.85,0.85);  //0.88
+  TLegend *leg=new TLegend(0.65,0.45,0.95,0.95);  //0.88
   //TLegend *leg=new TLegend(0.65,0.65,0.88,0.88);
 
   std::cout<<"Now examining generator true data"<<std::endl; 
+ 
+  for (int i = 0; i < filenames.size(); i++) {
+
+  std::cout << "File: " << filenames.at(i) << std::endl;
+  TFile* file = TFile::Open((filenames.at(i)).c_str());
+  TTree *tree = (TTree*)file->Get("FlatTree_VARS");
+	//insert variables here
+  double fSF=0.;
+  double SF;
+  int nfsp;
+  char cc;
+  float px[200];
+  float py[200];
+  float pz[200];
+  int pdg[200];
+  float coslep;
+  int pdglep;
+  float weight;
+  bool flagCCInc;
+  bool flagCC0pi;
+  //Set branch addresses
+//  tree->SetBranchAddress("fScaleFactor",&fSF);
+  tree->SetBranchAddress("flagCCINC",&flagCCInc);
+  tree->SetBranchAddress("flagCC0pi",&flagCC0pi);
+  tree->SetBranchAddress("cc",&cc);
+  tree->SetBranchAddress("px",&px);
+  tree->SetBranchAddress("py",&py);
+  tree->SetBranchAddress("pz",&pz);
+  tree->SetBranchAddress("pdg",&pdg);
+  tree->SetBranchAddress("nfsp",&nfsp);
+  tree->SetBranchAddress("CosLep",&coslep);
+  tree->SetBranchAddress("PDGLep",&pdglep);
+  tree->SetBranchAddress("Weight",&weight);
+
+//  std::string hname = "h_gen_"+std::to_string(i);
+  std::string hname = "h_gen_"+filenames.at(i).substr(filenames.at(i).find_last_of("/\\")+1, filenames.at(i).find(".root"));
+  TH1D* h_muons_gen = new TH1D(hname.c_str(), "; p_{#mu}; Number of Events", nbins.size() - 1, nbins.data());
+  double muon_m = 105.66;
+
+  for (int i_tree=0; i_tree<tree->GetEntries(); i_tree++) {//Loop over the entries.
+    tree->GetEntry(i_tree);
+
+//    SF = fSF;
+    float fslp = 0.;
+    bool haspion = false;
+    if(cc != 1) continue;
+    if(pdglep != 13) continue;
+    if(coslep <= 0.8) continue;
+    for(int index=0; index < nfsp; index++){
+      if(pdg[index] == 13){
+        fslp = 1000*std::sqrt(px[index]*px[index] + py[index]*py[index] + pz[index]*pz[index]);
+      }
+      if(std::abs(pdg[index]) == 211){
+        float pip = 1000*std::sqrt(px[index]*px[index] + py[index]*py[index] + pz[index]*pz[index]);
+        haspion = (pip > 160.);
+      }
+    }
+
+    if((fslp >= 600.) && (fslp < 1200.)){
+      if(chan == "0pi" && !haspion){
+        h_muons_gen->Fill(fslp, weight);
+      } else if(chan == "inc"){
+        h_muons_gen->Fill(fslp, weight);
+      }
+    }
+  }
+
+  fSF = tree->GetMaximum("fScaleFactor");
+
+//    h_muons_gen->FillRandom("gaus",10000);
+  multiply_1d_hist_by_matrix(A_C, h_muons_gen);  
+  for ( int t = 0; t < nbins.size() - 1; ++t ) { 
+    h_muons_gen->SetBinContent( t + 1, h_muons_gen->GetBinContent(t + 1)*16.*fSF*1e38/(nbins[t+1] - nbins[t]));
+//    std::cout << h_muons_gen->GetBinContent(t+1) << std::endl;
+  }
+
+  h_muons_gen->SetStats(0);
+  h_muons_gen->SetLineWidth(3);
+
+  if (i==0){
+    //h_muons_gen->GetYaxis()->SetTitle("d#sigma/dp_{#mu} [10^{-38} cm^{2}/(GeV/c)/Ar]");
+    //h_muons_gen->GetYaxis()->SetTitle("#frac{d#sigma}{dcos#theta_{#mu}} [ 10^{-38} #frac{cm^{2}}{Ar} ]");
+    h_muons_gen->GetYaxis()->SetTitle("#frac{d#sigma}{dp_{#mu}} [ 10^{-38} #frac{cm^{2}}{MeV/c O} ]");        
+
+//  h_muons_gen->SetAxisRange(0., 30.,"Y");
+    h_muons_gen->SetLineColor( kOrange + 2);
+    auto max = genie_cv_truth_vals->GetMaximum()*1.8; 
+    auto min = genie_cv_truth_vals->GetMinimum()*0.2; 
+    h_muons_gen->SetMaximum(max);
+    h_muons_gen->SetMinimum(min);
+    h_muons_gen->Draw(); //DRAW
+    TFile *outfile = new TFile(text_title_root, "recreate");
+    h_muons_gen->Write();
+    outfile->Close();
+  }
+  else{
+    if (i==1) h_muons_gen->SetLineColor(kCyan - 3); 
+    if (i==2) h_muons_gen->SetLineColor(kRed - 4);
+    if (i==3) h_muons_gen->SetLineColor(kGreen + 3);
+    if (i==4) h_muons_gen->SetLineColor(kAzure - 4);
+    if (i==5) h_muons_gen->SetLineColor(kGreen - 7);
+    //if (i==3) h_muons_gen->Draw();
+    h_muons_gen->Draw("HIST same");
+    TFile *outfile = new TFile(text_title_root, "update");
+    h_muons_gen->Write();
+    outfile->Close();
+  } 
+  if (i==0) leg->AddEntry(h_muons_gen,"NuWro 21.09","l");
+  if (i==1) leg->AddEntry(h_muons_gen,"GENIE 3.4.0 G18_10a_02_11a","l");
+  if (i==2) leg->AddEntry(h_muons_gen,"GENIE 3.4.0 G18_10b_02_11a","l");
+  if (i==3) leg->AddEntry(h_muons_gen,"GENIE 3.4.0 G18_02a_02_11a","l");
+  if (i==4) leg->AddEntry(h_muons_gen,"GiBUU 2025 p5","l");
+  if (i==5) leg->AddEntry(h_muons_gen,"NEUT 6.1.3","l");
+
+  double chi_square = 0;
+  for (int k=0; k<inv_cov_mat->GetNrows(); k++) {
+       for (int j=0; j<inv_cov_mat->GetNcols(); j++) {
+           chi_square += (unfolded_events_vals->GetBinContent(k+1)-h_muons_gen->GetBinContent(k+1))*(inv_cov_mat->operator()(k,j))*(unfolded_events_vals->GetBinContent(j+1)-h_muons_gen->GetBinContent(j+1));
+           //std::cout<<chi_square<<std::endl;
+       }
+   }
+    
+  double dof = inv_cov_mat->GetNrows();
+  double p_value = TMath::Prob(chi_square, dof);
+  //double sigma = TMath::Sqrt( TMath::ChisquareQuantile( 1-p_value, dof ) );
+  double sigma = RooStats::PValueToSignificance(p_value);
+  std::cout<<"chi_square is: "<<chi_square<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
+  leg->AddEntry((TObject*)0, TString::Format("#chi^{2} / d.o.f = %g / %g", chi_square, dof), "");
+  //leg->AddEntry((TObject*)0, TString::Format("p = %g || #sigma = %g ", p_value, sigma), ""); 
+  leg->AddEntry((TObject*)0, TString::Format("p = %.2f", p_value), "");
+  }
 
 
   double chi_square_cv = 0;
@@ -412,7 +564,7 @@ std::string text_title_pdf2_string(text_title_pdf2);
    }
   
 //  leg->AddEntry(genie_cv_truth_vals,"MicroBooNE Tune","l");
-  leg->AddEntry(genie_cv_truth_vals,"GENIE CV Truth","l");
+  leg->AddEntry(genie_cv_truth_vals,"GENIE 3.0.6 G18_10a_02_11a (CV Truth)","l");
   double dof = inv_cov_mat->GetNrows();
   double p_value = TMath::Prob(chi_square_cv, dof);
   std::cout<<"chi_square is: "<<chi_square_cv<<", d.o.f. is: "<<dof<<" and p-value is: "<<p_value<<std::endl;
@@ -437,6 +589,11 @@ std::string text_title_pdf2_string(text_title_pdf2);
   //leg->AddEntry(fake_data_truth_vals, TString::Format("p = %g || #sigma = %g", p_value, sigma), "");
   leg->AddEntry(fake_data_truth_vals, TString::Format("p = %.2f", p_value), "");
 */
+  genie_cv_truth_vals->SetLineColor( kMagenta - 3 );
+  genie_cv_truth_vals->SetLineWidth( 3 );
+  genie_cv_truth_vals->SetLineStyle( 2 );
+  genie_cv_truth_vals->Draw( "hist same" ); //DRAW
+
   unfolded_events_vals->SetStats(0);
   unfolded_events_vals->SetLineWidth(3);
   unfolded_events_vals->SetLineColor(kBlack);
@@ -447,9 +604,12 @@ std::string text_title_pdf2_string(text_title_pdf2);
   unfolded_events_vals->GetYaxis()->SetTitle("#frac{d#sigma}{dp_{#mu}} [ 10^{-38} #frac{cm^{2}}{MeV/c O} ]"); 
   //unfolded_events_vals->GetYaxis()->SetRangeUser(4000.,116000.);
   unfolded_events_vals->SetMaximum(max);
-  unfolded_events_vals->Draw("e"); //DRAW
+  unfolded_events_vals->Draw("e same"); //DRAW
   
-  
+  TFile *outfile = new TFile(text_title_root, "update");
+  genie_cv_truth_vals->Write();
+  unfolded_events_vals->Write();
+  outfile->Close();
      // Calculate the errors
     TH1D *h_upper = (TH1D*)unfolded_events_vals->Clone("h_upper");
     TH1D *h_lower = (TH1D*)unfolded_events_vals->Clone("h_lower");
@@ -464,13 +624,13 @@ std::string text_title_pdf2_string(text_title_pdf2);
   
     h_upper->SetLineColorAlpha(kRed, 0.55);
     h_upper->SetLineStyle(9); // Dashed line for upper bound
-    h_upper->Draw("HIST SAME"); // Draw the upper bound histogram
+//    h_upper->Draw("HIST SAME"); // Draw the upper bound histogram
     h_upper->SetLineWidth( 2 );
     h_lower->SetLineColorAlpha(kRed, 0.55);
     h_lower->SetLineStyle(9); // Dashed line for lower bound
-    h_lower->Draw("HIST SAME"); // Draw the lower bound histogram
+//    h_lower->Draw("HIST SAME"); // Draw the lower bound histogram
     h_lower->SetLineWidth( 2 );
-     leg->AddEntry(h_upper, "Error Bounds", "l");
+//     leg->AddEntry(h_upper, "Error Bounds", "l");
     //leg->AddEntry(h_lower, "Lower Bound", "l");
   
   //unfolded_events_vals->Draw("e");
@@ -478,16 +638,14 @@ std::string text_title_pdf2_string(text_title_pdf2);
 //  fake_data_truth_vals->SetLineWidth( 3 );
 //  fake_data_truth_vals->SetLineStyle( 2 );
 //  fake_data_truth_vals->Draw( "hist same" ); //DRAW
-  genie_cv_truth_vals->SetLineColor( kMagenta - 3 );
-  genie_cv_truth_vals->SetLineWidth( 3 );
-  genie_cv_truth_vals->SetLineStyle( 2 );
-  genie_cv_truth_vals->Draw( "hist same" ); //DRAW
-  
+
 //  leg->AddEntry(unfolded_events_vals,"Fake BNB data","l");
   leg->AddEntry(unfolded_events_vals,"Unfolded BNB data","l");
 leg->Draw();
+//  c2->SetGrid();
   c2->SetLeftMargin(0.2);
-  c2->SaveAs(text_title_pdf2);  
+  c2->SaveAs(text_title_pdf2);
+//  c2->SaveAs(text_title_root); 
 
 
 /*
@@ -543,6 +701,6 @@ c40->SaveAs(text_title_pdf3);
 
 int main(int argc, char* argv[]) {
    //chi_square_all_gens(argv[1]);
-   Test_plot();
+   Test_plot(argv[1]);
    return 0;
 }

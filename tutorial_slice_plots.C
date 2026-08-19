@@ -265,7 +265,7 @@ void tutorial_slice_plots() {
       slice_for_syst->hist_->SetLineWidth( 3 );
     }
 
-    TCanvas* c2 = new TCanvas;
+//    TCanvas* c2 = new TCanvas;
     TLegend* lg2 = new TLegend( 0.3, 0.6, 0.525, 0.9 );
     //TLegend* lg2 = new TLegend( 0.675, 0.6, 0.9, 0.9 );
 

@@ -44,7 +44,8 @@ void DVShift(){
 	double mcp, mcct;
 	bool mc_no_mesons, no_followers;
 	bool recofv, recoMRDInc, recoMRD0pi, reco0pi;
-	double recop, recopc, recoPE, recoE, tracklength, mcvtxy, recovtxy;
+	double recop, recopc, recoPE, recoE, tracklength, mctracklength, promptPE;
+	double mcvtxx, mcvtxy, mcvtxz, recovtxx, recovtxy, recovtxz;
 
         int simpleflag;
         double simplecostheta;
@@ -63,7 +64,8 @@ void DVShift(){
 	double dmcp, dmcct;
 	bool dmc_no_mesons, dno_followers;
 	bool drecofv, drecoMRDInc, drecoMRD0pi, dreco0pi;
-	double drecop, drecopc, drecoPE, dtracklength, dmcvtxy, drecovtxy;
+	double drecop, drecopc, drecoPE, dtracklength, dmctracklength, dpromptPE;
+	double dmcvtxx, dmcvtxy, dmcvtxz, drecovtxx, drecovtxy, drecovtxz;
 
         int dsimpleflag;
         double dsimplecostheta;
@@ -99,6 +101,9 @@ void DVShift(){
 	breakCSV(factorY_str, factorY);
 	breakCSV(uncsY_str, uncsY);
 
+	TRandom3 rnd;
+	rnd.SetSeed(1337);
+
 	int runs = 60;
 	//Loop through runs
 	for(int rn = 1; rn <= runs; rn++){
@@ -107,7 +112,7 @@ void DVShift(){
 	
 
         //Open file and trees
-        TFile *fcv = new TFile("/pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_CV_test_stv_ntuple.root","read");
+        TFile *fcv = new TFile("/pnfs/annie/persistent/users/jminock/v1_3_4_world_stv_DV_ntuples/PhaseIITree_CV_stv_ntuple.root","read");
 	string file_name = "/exp/annie/data/users/jminock/temp_add_branches/PhaseIITree_DV"+std::to_string(rn)+"_stv_ntuple.root";
         TFile *fdv = new TFile(file_name.c_str(),"create");
 //        gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
@@ -122,8 +127,8 @@ void DVShift(){
 		return false;
 	}
 
-	TRandom3 rnd;
-	rnd.SetSeed(rn);
+//	TRandom3 rnd;
+//	rnd.SetSeed(rn);
 
         //Set branch addresses
         tCV->SetBranchAddress("trigword",&trigword);
@@ -136,7 +141,10 @@ void DVShift(){
         tCV->SetBranchAddress("trueFV",&mcfv);
         tCV->SetBranchAddress("trueMuonMomentum",&mcp);
         tCV->SetBranchAddress("trueCosTheta",&mcct);
+        tCV->SetBranchAddress("trueNuIntxVtx_X",&mcvtxx);
         tCV->SetBranchAddress("trueNuIntxVtx_Y",&mcvtxy);
+        tCV->SetBranchAddress("trueNuIntxVtx_Z",&mcvtxz);
+        tCV->SetBranchAddress("trueTrackLengthInMRD",&mctracklength);
         tCV->SetBranchAddress("true_no_mesons",&mc_no_mesons);
         tCV->SetBranchAddress("true_no_followers",&no_followers);
         tCV->SetBranchAddress("recoInc_contained_in_MRD",&recoMRDInc);
@@ -152,7 +160,10 @@ void DVShift(){
         tCV->SetBranchAddress("simpleRecoMomentumCor",&recopc);
         tCV->SetBranchAddress("simpleRecoEnergy",&recoE);
         tCV->SetBranchAddress("simpleRecoCosTheta",&simplecostheta);
+        tCV->SetBranchAddress("simpleRecoVtxX",&recovtxx);
         tCV->SetBranchAddress("simpleRecoVtxY",&recovtxy);
+        tCV->SetBranchAddress("simpleRecoVtxZ",&recovtxz);
+        tCV->SetBranchAddress("promptMuonTotalPE",&promptPE);
 
 //        tCV->SetBranchAddress("MRDTrackStartX",&MRDTrackStartX);
 //        tCV->SetBranchAddress("MRDTrackStartY",&MRDTrackStartY);
@@ -169,7 +180,10 @@ void DVShift(){
         TBranch *Dtfv = tDV->Branch("trueFV",&dmcfv);
         TBranch *Dtmm = tDV->Branch("trueMuonMomentum",&dmcp);
         TBranch *Dtct = tDV->Branch("trueCosTheta",&dmcct);
+        TBranch *Dtvx = tDV->Branch("trueNuIntxVtx_X",&dmcvtxx);
         TBranch *Dtvy = tDV->Branch("trueNuIntxVtx_Y",&dmcvtxy);
+        TBranch *Dtvz = tDV->Branch("trueNuIntxVtx_Z",&dmcvtxz);
+        TBranch *Dttl = tDV->Branch("trueTrackLengthInMRD",&dmctracklength);
         TBranch *Dtnm = tDV->Branch("true_no_mesons",&dmc_no_mesons);
         TBranch *Dtnf = tDV->Branch("true_no_followers",&dno_followers);
         TBranch *Dric = tDV->Branch("recoInc_contained_in_MRD",&drecoMRDInc);
@@ -184,7 +198,10 @@ void DVShift(){
         TBranch *Drf = tDV->Branch("simpleRecoFlag",&dsimpleflag);
         TBranch *Drmo = tDV->Branch("simpleRecoMomentumCor",&drecopc);
         TBranch *Drct = tDV->Branch("simpleRecoCosTheta",&dsimplecostheta);
+        TBranch *Drvx = tDV->Branch("simpleRecoVtxX",&drecovtxx);
         TBranch *Drvy = tDV->Branch("simpleRecoVtxY",&drecovtxy);
+        TBranch *Drvz = tDV->Branch("simpleRecoVtxZ",&drecovtxz);
+        TBranch *Dpe = tDV->Branch("promptMuonTotalPE",&dpromptPE);
 
         double muon_m = 105.7;
 	double threshold = 0.0001;
@@ -220,8 +237,15 @@ void DVShift(){
 		dsimpleflag = simpleflag;
 		dsimplecostheta = simplecostheta;
 		dtracklength = tracklength;
+		dmctracklength = mctracklength;
+		dmcvtxx = mcvtxx;
+		drecovtxx = recovtxx;
 		dmcvtxy = mcvtxy;
 		drecovtxy = recovtxy;
+		dmcvtxz = mcvtxz;
+		drecovtxz = recovtxz;
+		dpromptPE = promptPE;
+
 
 		dmrd_eff = mrd_eff;          //moving factor from DV to own weighted category
 		ddirt_muon = dirt_muon;      //moving factor from DV to own weighted category
@@ -229,7 +253,7 @@ void DVShift(){
 		if(recoE < 0){//if invalid energy, skip
 			drecopc = recopc;
 		} else {
-//			double Emod = recoE*(1.0589); //from Luis
+			double Emod = recoE*(1.+0.0589-0.0187); //from Luis
 			double newE = recoE + rnd.Gaus(0.,E_unc);
 			//convert KE to corrected momentum
 			drecopc = std::sqrt((newE+muon_m)*(newE+muon_m) - muon_m*muon_m)*0.82 + 160.;
