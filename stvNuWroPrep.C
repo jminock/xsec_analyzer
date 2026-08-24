@@ -27,9 +27,9 @@ bool FidVol(double x, double y, double z){
         }
 }
 
-void stvPrep(){
+void stvNuWroPrep(){
         //Open file and trees
-        TFile *f = new TFile("/exp/annie/data/users/jminock/standard_tank_ntuples/PhaseIITree_temp_ntuple.root","update");
+        TFile *f = new TFile("/exp/annie/data/users/jminock/nuwro_tank_ntuples/PhaseIITree_1mil_nuwro_ntuple.root","update");
         gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDataModel.so");
 //      gSystem->Load("/exp/annie/app/users/jminock/ToolAnalysis/lib/libDict.so");
         gInterpreter->GenerateDictionary("map<string,vector<double>>", "map;string;vector");
@@ -54,20 +54,18 @@ void stvPrep(){
 
         bool mcfv;
 	double mcp, mcct;
-	bool mc_no_mesons;
-	bool recofv, recoMRD;
-	double recop, recopc;
+	bool mc_no_mesons, no_followers;
+	bool recofv, recoMRDInc, recoMRD0pi, reco0pi;
+	double recop, recopc, recoPE;
 
         int simpleflag, simplefv;
         double simpleenergy, simplecostheta, simplept, simplemrdenergy, simplemrdtrack, simpletanktrack;
         double simplevtxx, simplevtxy, simplevtxz, simplestopvtxx, simplestopvtxy, simplestopvtxz;
         double simplemrdstartx, simplemrdstarty, simplemrdstartz, simplemrdstopx, simplemrdstopy, simplemrdstopz;
         double rcsr, rcmr;
+	double Qij, PE;
         double recovtxx, recovtxy, recovtxz;
-        int julieflag, juliefv, nummrdlayers;
-        double julieenergy, juliecostheta, juliept, juliemrdtrack;
-        double julievtxx, julievtxy, julievtxz, juliestopvtxx, juliestopvtxy, juliestopvtxz;
-        double juliemrdstartx, juliemrdstarty, juliemrdstartz, juliemrdstopx, juliemrdstopy, juliemrdstopz;
+
         vector<double>* MRDTrackAngle = new vector<double>();
         vector<double>* MRDTrackAngleError = new vector<double>();
         vector<double>* MRDPenetrationDepth = new vector<double>();
@@ -84,12 +82,9 @@ void stvPrep(){
         vector<bool>* MRDSide = new vector<bool>();
         vector<bool>* MRDStop = new vector<bool>();
         vector<bool>* MRDThrough = new vector<bool>();
+	vector<int>* mcFolPPDG = new vector<int>();
 //      vector<double>* MRDTrackLengthTrig = new vector<double>();
 //      vector<double>* MRDTrackLengthMRD = new vector<double>();
-        vector<double>* All_weight = new vector<double>();
-        map<string,vector<double>>* xsecweights = new map<string,vector<double>>();
-        map<string,vector<double>>* fluxweights = new map<string,vector<double>>();
-        vector<double>* TCV_weight = new vector<double>();
         //TBranch *bwgts = 0;
         //Set branch addresses
 //      tTrig->SetBranchAddress("weight_All_UBGenie",&All_weight);
@@ -122,11 +117,6 @@ void stvPrep(){
         tTrig->SetBranchAddress("MRDThrough",&MRDThrough);
 
         tTrig->SetBranchAddress("trueCC",&isCC);
-        tTrig->SetBranchAddress("trueQEL",&isQEL);
-        tTrig->SetBranchAddress("trueRES",&isRES);
-        tTrig->SetBranchAddress("trueDIS",&isDIS);
-        tTrig->SetBranchAddress("trueCOH",&isCOH);
-        tTrig->SetBranchAddress("trueMEC",&isMEC);
         tTrig->SetBranchAddress("trueNuIntxVtx_X",&nuvtxx);
         tTrig->SetBranchAddress("trueNuIntxVtx_Y",&nuvtxy);
         tTrig->SetBranchAddress("trueNuIntxVtx_Z",&nuvtxz);
@@ -146,14 +136,10 @@ void stvPrep(){
         tTrig->SetBranchAddress("trueFSLMomentum_X",&fslpx);
         tTrig->SetBranchAddress("trueFSLMomentum_Y",&fslpy);
         tTrig->SetBranchAddress("trueFSLMomentum_Z",&fslpz);
-        tTrig->SetBranchAddress("trueFSLVtx_X",&fslvtxx);
-        tTrig->SetBranchAddress("trueFSLVtx_Y",&fslvtxy);
-        tTrig->SetBranchAddress("trueFSLVtx_Z",&fslvtxz);
         tTrig->SetBranchAddress("trueFSLEnergy",&mcfslE);
         tTrig->SetBranchAddress("trueFSLPdg",&mcfslpdg);
         tTrig->SetBranchAddress("triggerNumber",&trigNum);
-//      tTrig->SetBranchAddress("XSecWeights",&xsecweights);
-//      tTrig->SetBranchAddress("FluxWeights",&fluxweights);
+	tTrig->SetBranchAddress("trueFollowerParentPDG",&mcFolPPDG);
 
         //Simple Reco
         tTrig->SetBranchAddress("simpleRecoFlag",&simpleflag);
@@ -161,25 +147,18 @@ void stvPrep(){
         tTrig->SetBranchAddress("simpleRecoVtxX",&simplevtxx);
         tTrig->SetBranchAddress("simpleRecoVtxY",&simplevtxy);
         tTrig->SetBranchAddress("simpleRecoVtxZ",&simplevtxz);
-        tTrig->SetBranchAddress("simpleRecoStopVtxX",&simplestopvtxx);
-        tTrig->SetBranchAddress("simpleRecoStopVtxY",&simplestopvtxy);
-        tTrig->SetBranchAddress("simpleRecoStopVtxZ",&simplestopvtxz);
         tTrig->SetBranchAddress("simpleRecoCosTheta",&simplecostheta);
         tTrig->SetBranchAddress("simpleRecoPt",&simplept);
         tTrig->SetBranchAddress("simpleRecoFV",&simplefv);
         tTrig->SetBranchAddress("simpleRecoMrdEnergyLoss",&simplemrdenergy);
         tTrig->SetBranchAddress("simpleRecoTrackLengthInMRD",&simplemrdtrack);
         tTrig->SetBranchAddress("simpleRecoTrackLengthInTank",&simpletanktrack);
-        tTrig->SetBranchAddress("simpleRecoMRDStartX",&simplemrdstartx);
-        tTrig->SetBranchAddress("simpleRecoMRDStartY",&simplemrdstarty);
-        tTrig->SetBranchAddress("simpleRecoMRDStartZ",&simplemrdstartz);
-        tTrig->SetBranchAddress("simpleRecoMRDStopX",&simplemrdstopx);
-        tTrig->SetBranchAddress("simpleRecoMRDStopY",&simplemrdstopy);
-        tTrig->SetBranchAddress("simpleRecoMRDStopZ",&simplemrdstopz);
 
         //Ring Counting Reco
-        tTrig->SetBranchAddress("RCSRPred",&rcsr);
-        tTrig->SetBranchAddress("RCMRPred",&rcmr);
+//        tTrig->SetBranchAddress("RCSRPred",&rcsr);
+//        tTrig->SetBranchAddress("RCMRPred",&rcmr);
+	tTrig->SetBranchAddress("Qij",&Qij);
+	tTrig->SetBranchAddress("promptMuonTotalPE",&PE);
 
         //true Muon info from WCSim
         tTrig->SetBranchAddress("trueMuonEnergy",&mcmuonE);
@@ -197,12 +176,17 @@ void stvPrep(){
 //      tTrig->SetBranchAddress("truePenetratesMRD",&mcpenetratesmrd);
         TBranch *TFV    = tTrig->Branch("trueFV",&mcfv);
 	TBranch *RFV    = tTrig->Branch("recoFV",&recofv);
+	TBranch *RPE    = tTrig->Branch("recoPE",&recoPE);
 	TBranch *TMuP   = tTrig->Branch("trueMuonMomentum",&mcp);
 	TBranch *TCT    = tTrig->Branch("trueCosTheta",&mcct);
 	TBranch *RMuP   = tTrig->Branch("simpleRecoMomentum",&recop);
 	TBranch *RMuPC  = tTrig->Branch("simpleRecoMomentumCor",&recopc);
 	TBranch *TnoPi  = tTrig->Branch("true_no_mesons",&mc_no_mesons);
-	TBranch *RinMRD = tTrig->Branch("reco_contained_in_MRD",&recoMRD);
+	TBranch *TnoF   = tTrig->Branch("true_no_followers",&no_followers);
+	TBranch *RinMRDInc = tTrig->Branch("recoInc_contained_in_MRD",&recoMRDInc);
+	TBranch *RinMRD0pi = tTrig->Branch("reco0pi_contained_in_MRD",&recoMRD0pi);
+	TBranch *R0pi   = tTrig->Branch("reco_0pi",&reco0pi);
+
 
 //      tMRD->SetBranchAddress("runNumber",&rnMRD);
 //      tMRD->SetBranchAddress("eventNumber",&evNMRD);
@@ -214,12 +198,11 @@ void stvPrep(){
         std::cout << "TriggerTree: " << nentriesTrig << std::endl;
         //fill histograms
         for (Long64_t i = 0; i < nentriesTrig; i++) {
-//      for (Long64_t i = 0; i < 100; i++) {
+//      for (Long64_t i = 0; i < 2; i++) {
                 tTrig->GetEntry(i);
                 if(i%10000 == 0) std::cout << i << std::endl;
-                bool inFV = FidVol(nuvtxx,nuvtxy,nuvtxz);
+                bool inFV = FidVol(nuvtxx/10.,nuvtxy/10.,nuvtxz/10.);
                 bool simplerecoFV = FidVol(simplevtxx*100.,simplevtxy*100.,simplevtxz*100.);
-                double fslp = std::sqrt(fslpx*fslpx + fslpy*fslpy + fslpz*fslpz);
                 bool hasPi = ((hasPi0) || (hasPiP) || (hasPiM));
                 bool hasVisPi = ((hasPi0) || (hasPiPC) || (hasPiMC));
                 bool hasNonMuon = ((hasPi) || (hasKP) || (hasKM));
@@ -227,22 +210,31 @@ void stvPrep(){
 
                 mcfv = inFV;
 		recofv = simplerecoFV;
+		recoPE = ((PE > 500) || (PE < 3500)) ? true : false;
 		mcp = std::sqrt(mcmuonE*mcmuonE - muon_m*muon_m);
 		mcct = std::cos(mcangle*M_PI/180.);
-		recop  = std::sqrt(simpleenergy*simpleenergy - muon_m*muon_m);
-		recopc = std::sqrt(simpleenergy*simpleenergy - muon_m*muon_m)*1.25 - 137.;
-		mc_no_mesons = hasVisNonMuon;
-		recoMRD = numMRDTracks == 1 ? MRDStop->at(0) : false;
-				
+		double recototE = simpleenergy + muon_m;
+		recop  = std::sqrt(recototE*recototE - muon_m*muon_m);
+		recopc = std::sqrt(recototE*recototE - muon_m*muon_m)*0.82 + 160.;
+		mc_no_mesons = !(hasVisNonMuon);
+		no_followers = (std::find(mcFolPPDG->begin(), mcFolPPDG->end(), 211) != mcFolPPDG->end() || std::find(mcFolPPDG->begin(), mcFolPPDG->end(), -211) != mcFolPPDG->end()) ? false : true;
+		recoMRD0pi = numMRDTracks == 1 ? MRDStop->at(0) : false;
+		recoMRDInc = numMRDTracks > 0 ? MRDStop->at(0) : false;
+		reco0pi = ((PE > 200.*Qij*Qij) && (PE < 2000.*std::cbrt(4.5-Qij)+1500.)) ? true : false;
+
                 TFV->Fill();
 		RFV->Fill();
+		RPE->Fill();
 		TMuP->Fill();
 		TCT->Fill();
 		RMuP->Fill();
 		RMuPC->Fill();
 		TnoPi->Fill();
-		RinMRD->Fill();
-        }
+		TnoF->Fill();
+		RinMRDInc->Fill();
+		RinMRD0pi->Fill();
+		R0pi->Fill();
+	}
 
 
         tTrig->Write("",TObject::kOverwrite);

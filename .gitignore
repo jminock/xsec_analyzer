@@ -1,4 +1,15 @@
 *.root
+*.pdf
+*.txt
 univmake
 analyzer
 cc0pi_analyzer
+cp2*.sh
+hadd.sh
+addPOT.C
+addQij.C
+uBthru.C
+stvPrep*
+slim.C
+slimmer.C
+slimmest.C

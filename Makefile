@@ -1,11 +1,11 @@
 CXX = g++
 CXXFLAGS = -g -Wall -fPIC -Wno-unused-variable
-ROOTFLAGS = `root-config --cflags --glibs --libs` -lTreePlayer -lEG -lMinuit
+ROOTFLAGS = `root-config --cflags --glibs --libs` -lTreePlayer -lEG -lMinuit -lMathMore
 
 
 # make a binary for every .cxx file
 # all : $(patsubst %.cpp, %.o, $(wildcard *.cpp)) chi_square_cc0pi_christian univmake
- all : chi_square_cc0pi_christian univmake
+all : chi_square_cc0pi_christian univmake
 # cc0pi_analyzer_org
 # cc0pi_analyzer
 # # rule for each one
@@ -29,7 +29,7 @@ chi_square_cc0pi_christian: chi_square_cc0pi_christian.cpp
 	$(CXX) $(CXXFLAGS) $(ROOTFLAGS) -O3 -o $@ $^ includes/*.o
 
 univmake: univmake.C
-	 $(CXX) $(shell root-config --cflags --libs) -O3 -o $@ $^
+	 $(CXX) -g $(ROOTFLAGS) -O3 -o $@ $^
 	
 .PHONY: clean
 

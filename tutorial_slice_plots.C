@@ -30,9 +30,12 @@ void tutorial_slice_plots() {
 
   auto* syst_ptr = new MCC9SystematicsCalculator(
 //    "/exp/annie/data/users/jminock/stv-analysis/stv-univmake-output-20k.root",
-    "/exp/annie/app/users/jminock/xsec_analyzer/output.root",
-    "systcalc.conf" );
+    "output_inc_full.root",
+    "systcalc_data.conf" );
   auto& syst = *syst_ptr;
+
+  const double POTMC = 2.744e20;
+  const double POTBNB = 1.682e20;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
   // object. These contain the reco bin counts that we need to populate the
@@ -69,8 +72,8 @@ void tutorial_slice_plots() {
 
     // We now have all of the reco bin space histograms that we need as input.
     // Use them to make new histograms in slice space.
-//    SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
-//      *reco_bnb_hist, slice, &matrix_map.at("BNBstats") );
+    SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
+      *reco_bnb_hist, slice, &matrix_map.at("BNBstats") );
 
 //    SliceHistogram* slice_ext = SliceHistogram::make_slice_histogram(
 //      *reco_ext_hist, slice, &matrix_map.at("EXTstats") );
@@ -116,7 +119,7 @@ void tutorial_slice_plots() {
     }
 
     TCanvas* c1 = new TCanvas;
-/*    slice_bnb->hist_->SetLineColor( kBlack );
+    slice_bnb->hist_->SetLineColor( kBlack );
     slice_bnb->hist_->SetLineWidth( 3 );
     slice_bnb->hist_->SetMarkerStyle( kFullCircle );
     slice_bnb->hist_->SetMarkerSize( 0.8 );
@@ -125,14 +128,53 @@ void tutorial_slice_plots() {
       slice_mc_plus_ext->hist_->GetMaximum() ) * 1.07;
     slice_bnb->hist_->GetYaxis()->SetRangeUser( 0., ymax );
 
+    const auto &cm = &matrix_map.at("total");
+    SliceHistogram* s4s = SliceHistogram::make_slice_histogram(
+        *reco_mc_plus_ext_hist, slice, cm );
+
+      // The SliceHistogram object already set the bin errors appropriately
+      // based on the slice covariance matrix. Just change the bin contents
+      // for the current histogram to be fractional uncertainties. Also set
+      // the "uncertainties on the uncertainties" to zero.
+      // TODO: revisit this last bit, possibly assign bin errors here
+      for ( const auto& bin_pair : slice.bin_map_ ) {
+        int global_bin_idx = bin_pair.first;
+        double err = s4s->hist_->GetBinError( global_bin_idx );
+//	std::cout << err << std::endl;
+        slice_bnb->hist_->SetBinError( global_bin_idx, err );
+      }
+
+
     slice_bnb->hist_->Draw( "e" );
 
-    slice_pred_stack->Draw( "hist same" );
-*/
-    slice_mc_plus_ext->hist_->SetLineWidth( 3 );
-    slice_mc_plus_ext->hist_->Draw( "same hist e" );
+//    slice_pred_stack->Draw( "hist same" );
 
+    slice_mc_plus_ext->hist_->SetLineWidth( 3 );
+    slice_mc_plus_ext->hist_->Draw( "same hist" );
+
+    double chi2 = 0.;
+/*    for(int j = 1; j <= slice_bnb->hist_->GetNbinsX(); ++j){
+      if(slice_bnb->hist_->GetBinContent(j) > 0) {
+        chi2 += (slice_bnb->hist_->GetBinContent(j) - slice_mc_plus_ext->hist_->GetBinContent(j))*(slice_bnb->hist_->GetBinContent(j) - slice_mc_plus_ext->hist_->GetBinContent(j))/(slice_mc_plus_ext->hist_->GetBinContent(j));
+      }
+    }
+*/
+    for ( const auto& bin_pair : slice.bin_map_ ) {
+      int j = bin_pair.first;
+      double err = s4s->hist_->GetBinError( j );
+//	std::cout << err << std::endl;
+        if(slice_bnb->hist_->GetBinContent(j) > 0) {
+          chi2 += (slice_bnb->hist_->GetBinContent(j) - slice_mc_plus_ext->hist_->GetBinContent(j))*(slice_bnb->hist_->GetBinContent(j) - slice_mc_plus_ext->hist_->GetBinContent(j))/(err*err);
+        }
+    }
+
+    std::cout << "chi2/dof: " << chi2 << "/" << slice_bnb->hist_->GetNbinsX() << std::endl;
 //    slice_bnb->hist_->Draw( "same e" );
+
+    TLegend* lg = new TLegend( 0.75, 0.75, 0.9, 0.9 );
+    lg->AddEntry(slice_bnb->hist_.get(), "Data","l");
+    lg->AddEntry(slice_mc_plus_ext->hist_.get(), "MC","l");
+    lg->Draw("same");
 
     //std::string out_pdf_name = "plot_slice_";
     //if ( sl_idx < 10 ) out_pdf_name += "0";
@@ -154,7 +196,7 @@ void tutorial_slice_plots() {
     // in the ROOT plot. All configured fractional uncertainties will be
     // included in the output pgfplots file regardless of whether they appear
     // in this vector.
-    const std::vector< std::string > cov_mat_keys = { "total","flux_total","xsec_total","MCstats" };
+    const std::vector< std::string > cov_mat_keys = { "total","flux","xsec_total","MCstats","BNBstats", "detVar_total","POT","numTargets" };
  
 /*    const std::vector< std::string > cov_mat_keys = { "total",
       "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
@@ -171,6 +213,7 @@ void tutorial_slice_plots() {
       SliceHistogram* slice_for_syst = SliceHistogram::make_slice_histogram(
         *reco_mc_plus_ext_hist, slice, &cov_matrix );
 
+//std::cout << key << std::endl;
       // The SliceHistogram object already set the bin errors appropriately
       // based on the slice covariance matrix. Just change the bin contents
       // for the current histogram to be fractional uncertainties. Also set
@@ -178,8 +221,26 @@ void tutorial_slice_plots() {
       // TODO: revisit this last bit, possibly assign bin errors here
       for ( const auto& bin_pair : slice.bin_map_ ) {
         int global_bin_idx = bin_pair.first;
-        double y = slice_for_syst->hist_->GetBinContent( global_bin_idx );
-        double err = slice_for_syst->hist_->GetBinError( global_bin_idx );
+/*        if(key == "total"){
+          slice_for_syst->hist_->SetBinContent( global_bin_idx, 0);//add together later
+          slice_for_syst->hist_->SetBinError( global_bin_idx, 0. );
+          continue;
+        }*/
+        double y = 0.;
+        double err = 0.;
+        if(key == "BNBstats"){
+          y = slice_bnb->hist_->GetBinContent( global_bin_idx );//uses data CV
+          err = slice_for_syst->hist_->GetBinError( global_bin_idx );//uses data CV
+        } else if(key == "MCstats"){
+          slice_for_syst->hist_->Scale(POTMC/POTBNB);
+          y = slice_for_syst->hist_->GetBinContent( global_bin_idx );
+          slice_for_syst->hist_->Scale(POTBNB/POTMC);
+          err = slice_for_syst->hist_->GetBinError( global_bin_idx );
+        } else {
+          y = slice_for_syst->hist_->GetBinContent( global_bin_idx );
+          err = slice_for_syst->hist_->GetBinError( global_bin_idx );
+        }
+        if(key == "total") std::cout << err << std::endl;
         double frac = 0.;
         if ( y > 0. ) frac = err / y;
         slice_for_syst->hist_->SetBinContent( global_bin_idx, frac );
@@ -204,13 +265,22 @@ void tutorial_slice_plots() {
       slice_for_syst->hist_->SetLineWidth( 3 );
     }
 
-    TCanvas* c2 = new TCanvas;
-    TLegend* lg2 = new TLegend( 0.7, 0.7, 0.9, 0.9 );
+//    TCanvas* c2 = new TCanvas;
+    TLegend* lg2 = new TLegend( 0.3, 0.6, 0.525, 0.9 );
+    //TLegend* lg2 = new TLegend( 0.675, 0.6, 0.9, 0.9 );
 
-    auto* total_frac_err_hist = frac_uncertainty_hists.at( "total" );
+    //Add up total to account for corrected BNBstats
+/*    auto* total_frac_err_hist = frac_uncertainty_hists.at( "total" );
+    for ( const auto& pair : frac_uncertainty_hists ) {
+      const auto& key = pair.first;
+      if(key == "total") continue;
+      total_frac_err_hist->Add( pair.second );    
+    }
+*/
+    auto* total_frac_err_hist = frac_uncertainty_hists.at("total");
     total_frac_err_hist->SetStats( false );
     total_frac_err_hist->GetYaxis()->SetRangeUser( 0.,
-      total_frac_err_hist->GetMaximum() * 1.05 );
+      total_frac_err_hist->GetMaximum() * 1.55 );
     total_frac_err_hist->SetLineColor( kBlack );
     total_frac_err_hist->SetLineWidth( 3 );
     total_frac_err_hist->Draw( "hist" );
@@ -226,14 +296,18 @@ void tutorial_slice_plots() {
       lg2->AddEntry( hist, name.c_str(), "l" );
       hist->Draw( "same hist" );
 
-      std::cout << name << " frac err in bin #1 = "
-        << hist->GetBinContent( 1 )*100. << "%\n";
+//      for(int h_iter = 1; h_iter < hist->GetNbinsX(); h_iter++){
+//        std::cout << name << " frac err in bin #"<<h_iter<<" = " << hist->GetBinContent( h_iter )*100. << "%\n";
+//      }
     }
 
     lg2->Draw( "same" );
+//    for(int k = 1; k <= slice_mc_plus_ext->hist_->GetNbinsX(); ++k){
+//      std::cout << slice_mc_plus_ext->hist_->GetBinContent(k) << std::endl;
+//    }
 
-    std::cout << "Total frac error in bin #1 = "
-      << total_frac_err_hist->GetBinContent( 1 )*100. << "%\n";
+//    std::cout << "Total frac error in bin #1 = "
+//      << total_frac_err_hist->GetBinContent( 1 )*100. << "%\n";
 
   } // slices
 

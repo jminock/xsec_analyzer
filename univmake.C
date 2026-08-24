@@ -9,6 +9,7 @@
 #include "TFile.h"
 #include "TROOT.h"
 #include "TTree.h"
+#include "TRandom.h"
 
 // STV analysis includes
 #include "FilePropertiesManager.hh"
@@ -42,6 +43,10 @@ int main( int argc, char* argv[] ) {
       << " [FILE_PROPERTIES_CONFIG_FILE]\n";
     return 1;
   }
+
+  // Set random seed used later in UniverseMaker::build_universes()
+  // for DV smearing
+  gRandom->SetSeed(1337);
 
   std::string list_file_name( argv[1] );
   std::string univmake_config_file_name( argv[2] );

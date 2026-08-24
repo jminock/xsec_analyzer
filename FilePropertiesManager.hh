@@ -29,17 +29,20 @@ enum class NtupleFileType {
 
   // *** DetVar MC ***
   kDetVarMCCV, // central value
-  kDetVarMCLYatten, // light-yield attenuation
-  kDetVarMCLYdown, // light-yield down
-  kDetVarMCLYrayl, // light-yield Rayleigh scattering
-  kDetVarMCRecomb2, // light-yield recombination 2
-  kDetVarMCSCE, // space charge effect
-  kDetVarMCWMAngleXZ, // wireMod angle XZ
-  kDetVarMCWMAngleYZ, // wireMod angle YZ
-  kDetVarMCWMdEdx, // wireMod dE/dx
-  kDetVarMCWMX, // wireMod X
-  kDetVarMCWMYZ, // wireMod YZ
   kDetVarMCCVExtra, // alternate CV for small samples
+  // ANNIE generalized DV calibration universes
+  kDetVarMCShiftE1, kDetVarMCShiftE2, kDetVarMCShiftE3, kDetVarMCShiftE4, kDetVarMCShiftE5,
+  kDetVarMCShiftE6, kDetVarMCShiftE7, kDetVarMCShiftE8, kDetVarMCShiftE9, kDetVarMCShiftE10,
+  kDetVarMCShiftE11, kDetVarMCShiftE12, kDetVarMCShiftE13, kDetVarMCShiftE14, kDetVarMCShiftE15,
+  kDetVarMCShiftE16, kDetVarMCShiftE17, kDetVarMCShiftE18, kDetVarMCShiftE19, kDetVarMCShiftE20,
+  kDetVarMCShiftE21, kDetVarMCShiftE22, kDetVarMCShiftE23, kDetVarMCShiftE24, kDetVarMCShiftE25,
+  kDetVarMCShiftE26, kDetVarMCShiftE27, kDetVarMCShiftE28, kDetVarMCShiftE29, kDetVarMCShiftE30,
+  kDetVarMCShiftE31, kDetVarMCShiftE32, kDetVarMCShiftE33, kDetVarMCShiftE34, kDetVarMCShiftE35,
+  kDetVarMCShiftE36, kDetVarMCShiftE37, kDetVarMCShiftE38, kDetVarMCShiftE39, kDetVarMCShiftE40,
+  kDetVarMCShiftE41, kDetVarMCShiftE42, kDetVarMCShiftE43, kDetVarMCShiftE44, kDetVarMCShiftE45,
+  kDetVarMCShiftE46, kDetVarMCShiftE47, kDetVarMCShiftE48, kDetVarMCShiftE49, kDetVarMCShiftE50,
+  kDetVarMCShiftE51, kDetVarMCShiftE52, kDetVarMCShiftE53, kDetVarMCShiftE54, kDetVarMCShiftE55,
+  kDetVarMCShiftE56, kDetVarMCShiftE57, kDetVarMCShiftE58, kDetVarMCShiftE59, kDetVarMCShiftE60,
 
   // An alternate CV MC simulation
   kAltCVMC,
@@ -50,13 +53,38 @@ enum class NtupleFileType {
 
 // Utility functions for manipulating NtupleFileType values
 bool ntuple_type_is_detVar( const NtupleFileType& type ) {
-  constexpr std::array< NtupleFileType, 12 > detVar_types = {
-    NtupleFileType::kDetVarMCCV, NtupleFileType::kDetVarMCLYatten,
-    NtupleFileType::kDetVarMCLYdown, NtupleFileType::kDetVarMCLYrayl,
-    NtupleFileType::kDetVarMCRecomb2, NtupleFileType::kDetVarMCSCE,
-    NtupleFileType::kDetVarMCWMAngleXZ, NtupleFileType::kDetVarMCWMAngleYZ,
-    NtupleFileType::kDetVarMCWMdEdx, NtupleFileType::kDetVarMCWMX,
-    NtupleFileType::kDetVarMCWMYZ, NtupleFileType::kDetVarMCCVExtra
+  constexpr std::array< NtupleFileType, 62 > detVar_types = {
+    NtupleFileType::kDetVarMCCV, NtupleFileType::kDetVarMCCVExtra,
+    NtupleFileType::kDetVarMCShiftE1, NtupleFileType::kDetVarMCShiftE2,
+    NtupleFileType::kDetVarMCShiftE3, NtupleFileType::kDetVarMCShiftE4,
+    NtupleFileType::kDetVarMCShiftE5, NtupleFileType::kDetVarMCShiftE6,
+    NtupleFileType::kDetVarMCShiftE7, NtupleFileType::kDetVarMCShiftE8,
+    NtupleFileType::kDetVarMCShiftE9, NtupleFileType::kDetVarMCShiftE10,
+    NtupleFileType::kDetVarMCShiftE11, NtupleFileType::kDetVarMCShiftE12,
+    NtupleFileType::kDetVarMCShiftE13, NtupleFileType::kDetVarMCShiftE14,
+    NtupleFileType::kDetVarMCShiftE15, NtupleFileType::kDetVarMCShiftE16,
+    NtupleFileType::kDetVarMCShiftE17, NtupleFileType::kDetVarMCShiftE18,
+    NtupleFileType::kDetVarMCShiftE19, NtupleFileType::kDetVarMCShiftE20,
+    NtupleFileType::kDetVarMCShiftE21, NtupleFileType::kDetVarMCShiftE22,
+    NtupleFileType::kDetVarMCShiftE23, NtupleFileType::kDetVarMCShiftE24,
+    NtupleFileType::kDetVarMCShiftE25, NtupleFileType::kDetVarMCShiftE26,
+    NtupleFileType::kDetVarMCShiftE27, NtupleFileType::kDetVarMCShiftE28,
+    NtupleFileType::kDetVarMCShiftE29, NtupleFileType::kDetVarMCShiftE30,
+    NtupleFileType::kDetVarMCShiftE31, NtupleFileType::kDetVarMCShiftE32,
+    NtupleFileType::kDetVarMCShiftE33, NtupleFileType::kDetVarMCShiftE34,
+    NtupleFileType::kDetVarMCShiftE35, NtupleFileType::kDetVarMCShiftE36,
+    NtupleFileType::kDetVarMCShiftE37, NtupleFileType::kDetVarMCShiftE38,
+    NtupleFileType::kDetVarMCShiftE39, NtupleFileType::kDetVarMCShiftE40,
+    NtupleFileType::kDetVarMCShiftE41, NtupleFileType::kDetVarMCShiftE42,
+    NtupleFileType::kDetVarMCShiftE43, NtupleFileType::kDetVarMCShiftE44,
+    NtupleFileType::kDetVarMCShiftE45, NtupleFileType::kDetVarMCShiftE46,
+    NtupleFileType::kDetVarMCShiftE47, NtupleFileType::kDetVarMCShiftE48,
+    NtupleFileType::kDetVarMCShiftE49, NtupleFileType::kDetVarMCShiftE50,
+    NtupleFileType::kDetVarMCShiftE51, NtupleFileType::kDetVarMCShiftE52,
+    NtupleFileType::kDetVarMCShiftE53, NtupleFileType::kDetVarMCShiftE54,
+    NtupleFileType::kDetVarMCShiftE55, NtupleFileType::kDetVarMCShiftE56,
+    NtupleFileType::kDetVarMCShiftE57, NtupleFileType::kDetVarMCShiftE58,
+    NtupleFileType::kDetVarMCShiftE59, NtupleFileType::kDetVarMCShiftE60
   };
 
   const auto begin = detVar_types.cbegin();
@@ -286,17 +314,67 @@ class FilePropertiesManager {
       { "nueMC", NtupleFileType::kIntrinsicNueMC },
       { "dirtMC", NtupleFileType::kDirtMC },
       { "detVarCV", NtupleFileType::kDetVarMCCV },
-      { "detVarLYatten", NtupleFileType::kDetVarMCLYatten },
-      { "detVarLYdown", NtupleFileType::kDetVarMCLYdown },
-      { "detVarLYrayl", NtupleFileType::kDetVarMCLYrayl },
-      { "detVarRecomb2", NtupleFileType::kDetVarMCRecomb2 },
-      { "detVarSCE", NtupleFileType::kDetVarMCSCE },
-      { "detVarWMAngleXZ", NtupleFileType::kDetVarMCWMAngleXZ },
-      { "detVarWMAngleYZ", NtupleFileType::kDetVarMCWMAngleYZ },
-      { "detVarWMdEdx", NtupleFileType::kDetVarMCWMdEdx },
-      { "detVarWMX", NtupleFileType::kDetVarMCWMX },
-      { "detVarWMYZ", NtupleFileType::kDetVarMCWMYZ },
       { "detVarCVExtra", NtupleFileType::kDetVarMCCVExtra },
+      { "detVarShiftE1", NtupleFileType::kDetVarMCShiftE1 },
+      { "detVarShiftE2", NtupleFileType::kDetVarMCShiftE2 },
+      { "detVarShiftE3", NtupleFileType::kDetVarMCShiftE3 },
+      { "detVarShiftE4", NtupleFileType::kDetVarMCShiftE4 },
+      { "detVarShiftE5", NtupleFileType::kDetVarMCShiftE5 },
+      { "detVarShiftE6", NtupleFileType::kDetVarMCShiftE6 },
+      { "detVarShiftE7", NtupleFileType::kDetVarMCShiftE7 },
+      { "detVarShiftE8", NtupleFileType::kDetVarMCShiftE8 },
+      { "detVarShiftE9", NtupleFileType::kDetVarMCShiftE9 },
+      { "detVarShiftE10", NtupleFileType::kDetVarMCShiftE10 },
+      { "detVarShiftE11", NtupleFileType::kDetVarMCShiftE11 },
+      { "detVarShiftE12", NtupleFileType::kDetVarMCShiftE12 },
+      { "detVarShiftE13", NtupleFileType::kDetVarMCShiftE13 },
+      { "detVarShiftE14", NtupleFileType::kDetVarMCShiftE14 },
+      { "detVarShiftE15", NtupleFileType::kDetVarMCShiftE15 },
+      { "detVarShiftE16", NtupleFileType::kDetVarMCShiftE16 },
+      { "detVarShiftE17", NtupleFileType::kDetVarMCShiftE17 },
+      { "detVarShiftE18", NtupleFileType::kDetVarMCShiftE18 },
+      { "detVarShiftE19", NtupleFileType::kDetVarMCShiftE19 },
+      { "detVarShiftE20", NtupleFileType::kDetVarMCShiftE20 },
+      { "detVarShiftE21", NtupleFileType::kDetVarMCShiftE21 },
+      { "detVarShiftE22", NtupleFileType::kDetVarMCShiftE22 },
+      { "detVarShiftE23", NtupleFileType::kDetVarMCShiftE23 },
+      { "detVarShiftE24", NtupleFileType::kDetVarMCShiftE24 },
+      { "detVarShiftE25", NtupleFileType::kDetVarMCShiftE25 },
+      { "detVarShiftE26", NtupleFileType::kDetVarMCShiftE26 },
+      { "detVarShiftE27", NtupleFileType::kDetVarMCShiftE27 },
+      { "detVarShiftE28", NtupleFileType::kDetVarMCShiftE28 },
+      { "detVarShiftE29", NtupleFileType::kDetVarMCShiftE29 },
+      { "detVarShiftE30", NtupleFileType::kDetVarMCShiftE30 },
+      { "detVarShiftE31", NtupleFileType::kDetVarMCShiftE31 },
+      { "detVarShiftE32", NtupleFileType::kDetVarMCShiftE32 },
+      { "detVarShiftE33", NtupleFileType::kDetVarMCShiftE33 },
+      { "detVarShiftE34", NtupleFileType::kDetVarMCShiftE34 },
+      { "detVarShiftE35", NtupleFileType::kDetVarMCShiftE35 },
+      { "detVarShiftE36", NtupleFileType::kDetVarMCShiftE36 },
+      { "detVarShiftE37", NtupleFileType::kDetVarMCShiftE37 },
+      { "detVarShiftE38", NtupleFileType::kDetVarMCShiftE38 },
+      { "detVarShiftE39", NtupleFileType::kDetVarMCShiftE39 },
+      { "detVarShiftE40", NtupleFileType::kDetVarMCShiftE40 },
+      { "detVarShiftE41", NtupleFileType::kDetVarMCShiftE41 },
+      { "detVarShiftE42", NtupleFileType::kDetVarMCShiftE42 },
+      { "detVarShiftE43", NtupleFileType::kDetVarMCShiftE43 },
+      { "detVarShiftE44", NtupleFileType::kDetVarMCShiftE44 },
+      { "detVarShiftE45", NtupleFileType::kDetVarMCShiftE45 },
+      { "detVarShiftE46", NtupleFileType::kDetVarMCShiftE46 },
+      { "detVarShiftE47", NtupleFileType::kDetVarMCShiftE47 },
+      { "detVarShiftE48", NtupleFileType::kDetVarMCShiftE48 },
+      { "detVarShiftE49", NtupleFileType::kDetVarMCShiftE49 },
+      { "detVarShiftE50", NtupleFileType::kDetVarMCShiftE50 },
+      { "detVarShiftE51", NtupleFileType::kDetVarMCShiftE51 },
+      { "detVarShiftE52", NtupleFileType::kDetVarMCShiftE52 },
+      { "detVarShiftE53", NtupleFileType::kDetVarMCShiftE53 },
+      { "detVarShiftE54", NtupleFileType::kDetVarMCShiftE54 },
+      { "detVarShiftE55", NtupleFileType::kDetVarMCShiftE55 },
+      { "detVarShiftE56", NtupleFileType::kDetVarMCShiftE56 },
+      { "detVarShiftE57", NtupleFileType::kDetVarMCShiftE57 },
+      { "detVarShiftE58", NtupleFileType::kDetVarMCShiftE58 },
+      { "detVarShiftE59", NtupleFileType::kDetVarMCShiftE59 },
+      { "detVarShiftE60", NtupleFileType::kDetVarMCShiftE60 },
       { "altCVMC", NtupleFileType::kAltCVMC },
     };
 
